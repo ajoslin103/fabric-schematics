@@ -1,0 +1,21 @@
+{
+  "name": "fabric-layers-examples",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Examples for fabric-layers packages",
+  "workspaces": [
+    "fabric-layers-core",
+    "fabric-layers-react"
+  ],
+  "scripts": {
+    "start:core": "cd fabric-layers-core && npm start",
+    "start:react": "cd fabric-layers-react && npm start",
+    "build:core": "cd fabric-layers-core && npm run build",
+    "build:react": "cd fabric-layers-react && npm run build",
+    "test:core": "cd fabric-layers-core && npm test",
+    "test:react": "cd fabric-layers-react && npm test"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

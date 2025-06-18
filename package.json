@@ -1,0 +1,28 @@
+{
+  "name": "fabric-layers",
+  "version": "0.0.1",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "nx run-many --target=build --all",
+    "build:core": "nx build fabric-layers-core",
+    "build:react": "nx build fabric-layers-react",
+    "test": "nx run-many --target=test --all",
+    "test:core": "nx test fabric-layers-core",
+    "test:react": "nx test fabric-layers-react",
+    "lint": "nx run-many --target=lint --all",
+    "lint:core": "nx lint fabric-layers-core",
+    "lint:react": "nx lint fabric-layers-react",
+    "watch": "nx run-many --target=watch --all",
+    "watch:core": "nx watch fabric-layers-core",
+    "watch:react": "nx watch fabric-layers-react"
+  },
+  "devDependencies": {
+    "@nrwl/workspace": "^16.0.0",
+    "nx": "^16.0.0",
+    "typescript": "^5.0.0"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
+}
