@@ -1,7 +1,7 @@
 /* global describe, it, before */
 
 import chai from 'chai';
-import { fabric } from 'fabric';
+import { fabric } from 'fabric-pure-browser';
 
 window.fabric = fabric;
 

@@ -1,4 +1,4 @@
-import { Canvas } from 'fabric';
+import { Canvas } from 'fabric-pure-browser';
 import { Axis } from './Axis';
 
 export interface GridOptions {
