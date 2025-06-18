@@ -14,7 +14,7 @@ React components and hooks for fabric-layers-core.
 
 ### Prerequisites
 - Node.js v22.16.0 (use nvm)
-- npm (comes with Node.js)
+- Yarn (v1.x recommended)
 
 ### Installation
 
@@ -24,14 +24,19 @@ React components and hooks for fabric-layers-core.
    nvm use
    ```
 
-2. Install dependencies:
+2. Install Yarn if you haven't already:
    ```bash
-   npm install
+   npm install -g yarn
    ```
 
-3. Build all packages:
+3. Install dependencies:
    ```bash
-   npm run build
+   yarn install
+   ```
+
+4. Build all packages:
+   ```bash
+   yarn build
    ```
 
 ## Development
@@ -40,7 +45,7 @@ React components and hooks for fabric-layers-core.
 
 Build all packages:
 ```bash
-npm run build
+yarn build
 ```
 
 Build a specific package:
@@ -54,7 +59,7 @@ nx build fabric-layers-react
 
 Run tests for all packages:
 ```bash
-npm test
+yarn test
 ```
 
 Run tests for a specific package:
@@ -68,7 +73,7 @@ nx test fabric-layers-react
 
 Lint all packages:
 ```bash
-npm run lint
+yarn lint
 ```
 
 Lint a specific package:
