@@ -24,5 +24,8 @@
   },
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "resolutions": {
+    "**/@parcel/watcher": "^2.0.0"
+  }
 }

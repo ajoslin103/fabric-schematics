@@ -8,12 +8,12 @@
     "fabric-layers-react"
   ],
   "scripts": {
-    "start:core": "cd fabric-layers-core && npm start",
-    "start:react": "cd fabric-layers-react && npm start",
-    "build:core": "cd fabric-layers-core && npm run build",
-    "build:react": "cd fabric-layers-react && npm run build",
-    "test:core": "cd fabric-layers-core && npm test",
-    "test:react": "cd fabric-layers-react && npm test"
+    "start:core": "yarn workspace fabric-layers-core-example start",
+    "start:react": "yarn workspace fabric-layers-react-example start",
+    "build:core": "yarn workspace fabric-layers-core-example build",
+    "build:react": "yarn workspace fabric-layers-react-example build",
+    "test:core": "yarn workspace fabric-layers-core-example test",
+    "test:react": "yarn workspace fabric-layers-react-example test"
   },
   "devDependencies": {
     "http-server": "^14.1.1"

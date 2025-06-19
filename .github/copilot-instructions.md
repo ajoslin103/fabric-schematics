@@ -1,6 +1,16 @@
 # Fabric Layers
 
-## this project is an NX monorepo with two packages:
+## this project is a monorepo 
+
+### WE ARE USING YARN v1 AS THE PACKAGE MANAGER
+
+### WE ARE USING NVM TO MANAGE NODE VERSIONS
+
+### WE ARE USING NX TO MANAGE THE MONOREPO
+
+There is a packages folder with two packages that we will build and publish to npmjs.com
+
+NOTE: We are building aginst fabric-pure-browser to avoid issues with canvas in the browser
 
 - fabric-layers-core
 

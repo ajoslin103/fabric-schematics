@@ -4,6 +4,34 @@ An interactive coordinate-plane, grid, and layer management library for [fabric.
 
 `fabric-layers` is based on the excellent original work of [ReactIndoorMapping](https://github.com/martinwairegi/ReactIndoorMapping) featured in this [blog post](https://blog.logrocket.com/build-indoor-maps-fabric-js-react/). The library has been refactored to be framework-agnostic while maintaining all the features of the original.
 
+## 🚀 Running the Grid Demo
+
+To explore the grid functionality, follow these steps:
+
+1. **Install Dependencies**
+   ```bash
+   yarn install
+   ```
+
+2. **Build the Library**
+   ```bash
+   yarn build
+   ```
+
+3. **Open the Demo**
+   - Open `grid-demo.html` directly in your browser
+   - The demo includes:
+     - Interactive grid with zoom/pan functionality
+     - Coordinate display
+     - Zoom level controls
+     - Reset view button
+
+4. **Development Workflow**
+   - Make changes to the source code
+   - Rebuild with `yarn build`
+   - Refresh the browser to see changes
+
+
 ---
 
 ## ✨ Classes

@@ -1,7 +1,7 @@
 // Type definitions for fabric-layers
 
 import { EventEmitter2 } from 'eventemitter2';
-import { Canvas, IEvent, Object as FabricObject } from 'fabric';
+import { Canvas, IEvent, Object as FabricObject } from 'fabric-pure-browser';
 
 declare module 'fabric-layers' {
   export interface BaseOptions {
