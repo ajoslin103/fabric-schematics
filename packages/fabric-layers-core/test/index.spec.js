@@ -2,33 +2,37 @@
 
 import chai from 'chai';
 import { fabric } from 'fabric-pure-browser';
+import { Map, Marker } from '../src';
 
 window.fabric = fabric;
 
 chai.expect();
-
 const expect = chai.expect;
 
 let lib;
 
-describe('Given an instance of my Cat library', () => {
+describe('Map Class Tests', () => {
   before(() => {
-    lib = new Map();
-  });
-  describe('when I need the name', () => {
-    it('should return the name', () => {
-      expect(lib).to.have.property('canvas');
+    lib = new Map({
+      canvas: new fabric.Canvas(document.createElement('canvas'))
     });
+  });
+  
+  it('should initialize with a canvas', () => {
+    expect(lib.canvas).to.exist;
+    expect(lib.canvas).to.be.instanceof(fabric.Canvas);
   });
 });
 
-describe('Given an instance of my Dog library', () => {
+describe('Marker Class Tests', () => {
   before(() => {
-    lib = new Marker();
-  });
-  describe('when I need the name', () => {
-    it('should return the name', () => {
-      expect(lib.class).to.be.equal('marker');
+    lib = new Marker({
+      left: 0,
+      top: 0,
     });
+  });
+  
+  it('should initialize with correct type', () => {
+    expect(lib.type).to.equal('marker');
   });
 });
