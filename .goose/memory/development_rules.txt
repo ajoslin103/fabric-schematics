@@ -1,0 +1,7 @@
+# rules yarn nvm fabric.js
+Critical Development Rules:
+1. Always use Yarn v1 for package management
+2. Use NVM for Node.js version management (v22.16.0)
+3. Do not use native fabric.js routines where a fabric-layers class is available
+4. In React components, only use fabric-layer-react components, not native fabric.js methods
+
