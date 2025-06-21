@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.5](https://github.com/ajoslin103/fabric-layers/compare/v1.1.4...v1.1.5) (2025-06-20)
+
+### Bug Fixes
+
+* Fix ESM module compatibility issue with browser exports
+
 ## [1.1.4](https://github.com/ajoslin103/fabric-layers/compare/v1.1.3...v1.1.4) (2025-06-20)
 
 ### Bug Fixes

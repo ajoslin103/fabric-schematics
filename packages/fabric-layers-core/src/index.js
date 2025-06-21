@@ -36,13 +36,19 @@ export * from './measurement/index';
 // Paint tools
 export * from './paint/index';
 
+// Collect all exports
+const allExports = {
+  version,
+  // Add other exports here if needed
+};
+
 // If we're in a browser environment, add to global scope
 // But provide a noConflict method
 if (typeof window !== 'undefined') {
   const oldFabricLayers = window.FabricLayers;
   
-  // Create namespace if using UMD build
-  window.FabricLayers = window.FabricLayers || exports;
+  // Create namespace
+  window.FabricLayers = allExports;
   
   // Provide noConflict method
   window.FabricLayers.noConflict = function() {
@@ -50,3 +56,5 @@ if (typeof window !== 'undefined') {
     return this;
   };
 }
+
+export default allExports;
