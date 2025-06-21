@@ -11,7 +11,7 @@ export { version };
 
 // Log version info if in browser environment
 if (typeof window !== 'undefined') {
-  console.log('fabricJS ', fabric.version);
+  // fabric-pure-browser may not expose version the same way
   console.log('fabric-layers ', version);
 }
 
@@ -36,10 +36,13 @@ export * from './measurement/index';
 // Paint tools
 export * from './paint/index';
 
+// Import what we need for the browser
+import { Map } from './map/Map';
+
 // Collect all exports
 const allExports = {
   version,
-  // Add other exports here if needed
+  Map
 };
 
 // If we're in a browser environment, add to global scope
