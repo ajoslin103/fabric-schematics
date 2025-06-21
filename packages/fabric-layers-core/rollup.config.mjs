@@ -18,6 +18,18 @@ const outputConfig = (format) => ({
   format
 });
 
+const babelConfig = {
+  babelHelpers: 'runtime',
+  exclude: 'node_modules/**',
+  plugins: ['@babel/plugin-transform-runtime'],
+  presets: [
+    ['@babel/preset-env', {
+      targets: '> 0.25%, not dead',
+      modules: false
+    }]
+  ]
+};
+
 const commonPlugins = [
   nodeResolve({
     browser: true,
@@ -25,18 +37,7 @@ const commonPlugins = [
   }),
   commonjs(),
   json(),
-  babel({
-    babelHelpers: 'bundled',
-    exclude: 'node_modules/**',
-    presets: [
-      ['@babel/preset-env', {
-        targets: '> 0.25%, not dead',
-        modules: false,
-        useBuiltIns: 'usage',
-        corejs: 3
-      }]
-    ]
-  })
+  babel(babelConfig)
 ];
 
 export default [
@@ -59,7 +60,8 @@ export default [
         ...outputConfig('umd')
       }
     ],
-    plugins: commonPlugins
+    plugins: commonPlugins,
+    external: [/@babel\/runtime/]
   },
 
   // ESM build for modern bundlers
@@ -70,7 +72,8 @@ export default [
       format: 'es',
       ...outputConfig('es')
     },
-    plugins: commonPlugins
+    plugins: commonPlugins,
+    external: [/@babel\/runtime/]
   },
 
   // CommonJS build for Node.js/npm
@@ -81,6 +84,7 @@ export default [
       format: 'cjs',
       ...outputConfig('cjs')
     },
-    plugins: commonPlugins
+    plugins: commonPlugins,
+    external: [/@babel\/runtime/]
   }
 ];
