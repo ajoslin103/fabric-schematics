@@ -463,6 +463,18 @@ estree-walker@^2.0.2:
   resolved "https://registry.yarnpkg.com/estree-walker/-/estree-walker-2.0.2.tgz#52f010178c2a4c117a7757cfe942adb7d2da4cac"
   integrity sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w==
 
+eventemitter2@^6.4.9:
+  version "6.4.9"
+  resolved "https://registry.yarnpkg.com/eventemitter2/-/eventemitter2-6.4.9.tgz#41f2750781b4230ed58827bc119d293471ecb125"
+  integrity sha512-JEPTiaOt9f04oa6NOkc4aH+nVp5I3wEjpHbIPqfgCdD5v5bUzy7xQqwcVO2aDQgOWhI28da57HksMrzK9HlRxg==
+
+fabric-layers-core@^1.1.5:
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/fabric-layers-core/-/fabric-layers-core-1.1.5.tgz#05e603abc4660dec9508be423d0381442967b6e1"
+  integrity sha512-mwLGpr7Viq8Hg+/vEdcSDPHSokPaJrVYU0X895N9XEjv16urt/jXNnKeFVCec/mX6EKV9vWeS07+6RTFawENMQ==
+  dependencies:
+    eventemitter2 "^6.4.9"
+
 fdir@^6.4.4:
   version "6.4.6"
   resolved "https://registry.yarnpkg.com/fdir/-/fdir-6.4.6.tgz#2b268c0232697063111bbf3f64810a2a741ba281"
