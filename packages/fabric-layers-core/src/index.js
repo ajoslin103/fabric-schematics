@@ -38,11 +38,13 @@ export * from './paint/index';
 
 // Import what we need for the browser
 import { Map } from './map/Map';
+import { OriginPin } from './core/Constants';
 
 // Collect all exports
 const allExports = {
   version,
-  Map
+  Map,
+  OriginPin
 };
 
 // If we're in a browser environment, add to global scope

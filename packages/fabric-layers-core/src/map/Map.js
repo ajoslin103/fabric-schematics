@@ -2,7 +2,7 @@ import panzoom from '../lib/panzoom';
 import { clamp } from '../lib/mumath/index';
 
 import Base from '../core/Base';
-import { MAP, Modes } from '../core/Constants';
+import { MAP, Modes, OriginPin } from '../core/Constants';
 import Grid from '../grid/Grid';
 import { Point } from '../geometry/Point';
 import ModesMixin from './ModesMixin';
@@ -42,18 +42,20 @@ export class Map extends mix(Base).with(ModesMixin) {
       if (this.autostart) this.clear();
     });
 
-    this.originX = -this.canvas.width / 2;
-    this.originY = -this.canvas.height / 2;
+    // Initialize position based on pinned origin if set
+    const pinnedOrigin = this.getPinnedOrigin();
+    if (pinnedOrigin) {
+      this.originX = -pinnedOrigin.x;
+      this.originY = -pinnedOrigin.y;
+    } else {
+      this.originX = -this.canvas.width / 2;
+      this.originY = -this.canvas.height / 2;
+    }
 
     this.canvas.absolutePan({
       x: this.originX,
       y: this.originY
     });
-
-    // this.center = {
-    //   x: this.canvas.width / 2.0,
-    //   y: this.canvas.height / 2.0
-    // };
 
     this.x = this.center.x;
     this.y = this.center.y;
@@ -140,10 +142,20 @@ export class Map extends mix(Base).with(ModesMixin) {
   setZoom(zoom) {
     const { width, height } = this.canvas;
     this.zoom = clamp(zoom, this.minZoom, this.maxZoom);
-    this.dx = 0;
-    this.dy = 0;
-    this.x = width / 2.0;
-    this.y = height / 2.0;
+    
+    // When pinned, maintain the pinned origin
+    if (this.originPin !== OriginPin.NONE) {
+      this.canvas.absolutePan({
+        x: this.originX,
+        y: this.originY
+      });
+    } else {
+      this.dx = 0;
+      this.dy = 0;
+      this.x = width / 2.0;
+      this.y = height / 2.0;
+    }
+    
     this.update();
     setTimeout(() => {
       this.update();
@@ -296,6 +308,22 @@ export class Map extends mix(Base).with(ModesMixin) {
     if (hasKeepZoom) canvas.requestRenderAll();
   }
 
+  getPinnedOrigin() {
+    const { width, height } = this.canvas;
+    switch (this.originPin) {
+      case OriginPin.TOP_LEFT:
+        return { x: 0, y: 0 };
+      case OriginPin.TOP_RIGHT:
+        return { x: width, y: 0 };
+      case OriginPin.BOTTOM_LEFT:
+        return { x: 0, y: height };
+      case OriginPin.BOTTOM_RIGHT:
+        return { x: width, y: height };
+      default:
+        return null;
+    }
+  }
+
   panzoom(e) {
     // enable interactions
     const { width, height } = this.canvas;
@@ -308,23 +336,42 @@ export class Map extends mix(Base).with(ModesMixin) {
 
     let { x, y } = this.center;
 
-    // pan
-    const oX = 0.5;
-    const oY = 0.5;
-    if (this.isGrabMode() || e.isRight) {
-      x -= prevZoom * e.dx;
-      y += prevZoom * e.dy;
-      this.setCursor('grab');
-    } else {
-      this.setCursor('pointer');
+    // Handle panning only if enabled and no pin is set
+    if (this.enablePan && this.originPin === OriginPin.NONE) {
+      if (this.isGrabMode() || e.isRight) {
+        x -= prevZoom * e.dx;
+        y += prevZoom * e.dy;
+        this.setCursor('grab');
+      } else {
+        this.setCursor('pointer');
+      }
     }
 
     if (this.zoomEnabled) {
-      const tx = e.x / width - oX;
-      x -= width * (curZoom - prevZoom) * tx;
-      const ty = oY - e.y / height;
-      y -= height * (curZoom - prevZoom) * ty;
+      const pinnedOrigin = this.getPinnedOrigin();
+      if (pinnedOrigin) {
+        // When pinned, we want the pinned point to stay exactly where it is
+        // Scale all points relative to the pinned point
+        const sx = curZoom / prevZoom; // scale factor
+        const dx = pinnedOrigin.x - e.x;
+        const dy = pinnedOrigin.y - e.y;
+        
+        // Move back to maintain pinned point
+        this.canvas.absolutePan({
+          x: this.originX,
+          y: this.originY
+        });
+      } else {
+        // Normal zoom behavior around mouse point
+        const oX = 0.5;
+        const oY = 0.5;
+        const tx = e.x / width - oX;
+        x -= width * (curZoom - prevZoom) * tx;
+        const ty = oY - e.y / height;
+        y -= height * (curZoom - prevZoom) * ty;
+      }
     }
+
     this.center.setX(x);
     this.center.setY(y);
     this.zoom = 1 / curZoom;
@@ -333,7 +380,57 @@ export class Map extends mix(Base).with(ModesMixin) {
     this.x = e.x0;
     this.y = e.y0;
     this.isRight = e.isRight;
-    this.isRight = e.isRight;
+    this.update();
+  }
+
+  setOriginPin(pin) {
+    if (!Object.values(OriginPin).includes(pin)) {
+      console.error('Invalid origin pin value. Use values from OriginPin constant.');
+      return;
+    }
+    console.log('Setting pin to:', pin);
+    this.originPin = pin;
+    this.enablePan = pin === OriginPin.NONE;
+
+    const { width, height } = this.canvas;
+    console.log('Canvas dimensions:', width, height);
+    
+    // Calculate new origin position based on pin location
+    const pinnedOrigin = this.getPinnedOrigin();
+    if (pinnedOrigin) {
+      this.originX = -pinnedOrigin.x;
+      this.originY = -pinnedOrigin.y;
+    } else {
+      // Default center position
+      this.originX = -width / 2;
+      this.originY = -height / 2;
+    }
+
+    // Move canvas to new origin
+    this.canvas.absolutePan({
+      x: this.originX,
+      y: this.originY
+    });
+
+    // Update grid if it exists
+    if (this.grid) {
+      // Update both axes' offsets and redraw
+      if (pin === OriginPin.NONE) {
+        this.grid.axisX.offset = width/2;
+        this.grid.axisY.offset = height/2;
+      } else {
+        this.grid.axisX.offset = pin === OriginPin.TOP_LEFT || pin === OriginPin.BOTTOM_LEFT ? 0 : width;
+        this.grid.axisY.offset = pin === OriginPin.TOP_LEFT || pin === OriginPin.TOP_RIGHT ? 0 : height;
+      }
+      this.grid.draw();
+    }
+
+    // Reset any ongoing pan/zoom state
+    this.dx = 0;
+    this.dy = 0;
+    this.x = width / 2;
+    this.y = height / 2;
+    
     this.update();
   }
 

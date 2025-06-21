@@ -59,7 +59,7 @@ const panzoom = (target, cb) => {
     }
   };
 
-  target.addEventListener('wheel', wheelListener);
+  target.addEventListener('wheel', wheelListener, hasPassive() ? { passive: true } : false);
   target.addEventListener('touchstart', initFn, hasPassive() ? { passive: true } : false);
 
   target.addEventListener(
