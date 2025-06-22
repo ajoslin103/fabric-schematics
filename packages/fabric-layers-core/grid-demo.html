@@ -21,6 +21,10 @@
         <label style="margin-right:10px;">
           Max Zoom: <input id="maxZoomInput" type="number" step="0.01" value="20" style="width:70px;">
         </label>
+        <br><br>
+        <label style="margin-right:10px;">
+          Pin Margin: <input id="pinMarginInput" type="number" step="1" value="10" style="width:70px;">
+        </label>
         <label style="margin-right:10px;">
           Pin Origin: 
           <select id="pinSelect" style="width:100px;">
@@ -76,11 +80,17 @@
           if (typeof map.reset === 'function') map.reset();
         };
 
-        // Wire pin select
+        // Wire pin select & margin
         const pinSelect = document.getElementById('pinSelect');
+        const pinMarginInput = document.getElementById('pinMarginInput');
         pinSelect.addEventListener('change', function() {
           map.setOriginPin(window.FabricLayers.OriginPin[this.value]);
         });
+        pinMarginInput.addEventListener('change', function() {
+          map.setPinMargin(parseInt(this.value, 10));
+        });
+        // Set initial margin
+        map.setPinMargin(parseInt(pinMarginInput.value, 10));
 
         // Wire min/max zoom inputs
         const minZoomInput = document.getElementById('minZoomInput');
