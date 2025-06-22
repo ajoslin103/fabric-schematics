@@ -14,6 +14,8 @@ export class Map extends mix(Base).with(ModesMixin) {
     super(options);
 
     this.defaults = Object.assign({}, MAP);
+    this.isPinned = false;
+    this.pinMargin = 0;
 
     // set defaults
     Object.assign(this, this.defaults);
