@@ -71,6 +71,12 @@
           mode: 'GRAB', // Enable pan/zoom mode by default
         });
 
+        // Development helper to log a message
+        map.on('logevent', function(data) {
+          const { title, ...rest } = data;
+          console.debug(title, rest);
+        });
+
         // Show grid if not auto-enabled
         if (!map.grid) {
           if (typeof map.addGrid === 'function') map.addGrid();
