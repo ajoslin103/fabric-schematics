@@ -362,9 +362,15 @@ export class Map extends mix(Base).with(ModesMixin) {
     }, 0);
   }
 
-  setOriginPin(pinned) {
-    this.originPinned = pinned;
-    this.emit('originpin:change', pinned);
+  setOriginPin(corner) {
+    this.isPinned = corner !== 'NONE';
+    this.pinnedCorner = corner;
+    this.emit('originpin:change', corner);
+  }
+
+  setPinMargin(margin) {
+    this.pinMargin = margin;
+    this.emit('pinmargin:change', margin);
   }
 
   registerListeners() {
