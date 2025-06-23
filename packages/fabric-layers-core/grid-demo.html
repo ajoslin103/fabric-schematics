@@ -85,9 +85,11 @@
         const pinSelect = document.getElementById('pinSelect');
         const pinMarginInput = document.getElementById('pinMarginInput');
         pinSelect.addEventListener('change', function() {
-          map.setOriginPin(window.FabricLayers.OriginPin[this.value]);
+          console.log('Pin set:', this.value); 
+          map.setOriginPin(this.value);
         });
         pinMarginInput.addEventListener('change', function() {
+          console.log('Margin change:', this.value);
           map.setPinMargin(parseInt(this.value, 10));
         });
         // Set initial margin
