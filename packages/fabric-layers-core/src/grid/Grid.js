@@ -33,19 +33,21 @@ class Grid extends Base {
   getPinnedX() {
     const { width } = this.canvas;
     const effectiveWidth = width / this.center.zoom;
+    const scaledMargin = this.pinMargin / this.center.zoom;
     if (this.pinnedCorner.includes('RIGHT')) {
-      return -((effectiveWidth/2) - this.pinMargin);
+      return -((effectiveWidth/2) - scaledMargin);
     }
-    return ((effectiveWidth/2) - this.pinMargin);
+    return ((effectiveWidth/2) - scaledMargin);
   }
 
   getPinnedY() {
     const { height } = this.canvas;
     const effectiveHeight = height / this.center.zoom;
+    const scaledMargin = this.pinMargin / this.center.zoom;
     if (this.pinnedCorner.includes('BOTTOM')) { 
-      return (effectiveHeight/2) - this.pinMargin;
+      return (effectiveHeight/2) - scaledMargin;
     }
-    return -(effectiveHeight/2) + this.pinMargin;
+    return -(effectiveHeight/2) + scaledMargin;
   }
 
   render() {
