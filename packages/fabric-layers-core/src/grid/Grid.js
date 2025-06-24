@@ -18,6 +18,33 @@ class Grid extends Base {
     this.update(opts);
   }
 
+  setOriginPin(corner) {
+    this.isPinned = corner !== 'NONE';
+    this.pinnedCorner = corner;
+    this.emit('originpin:change', corner);
+  }
+
+  setPinMargin(margin) {
+    this.pinMargin = margin;
+    this.emit('pinmargin:change', margin);
+  }
+
+  getPinnedX() {
+    const { width } = this.canvas;
+    if (this.pinnedCorner.includes('RIGHT')) {
+      return -((width/2) - this.pinMargin);
+    }
+    return ((width/2) - this.pinMargin);
+  }
+
+  getPinnedY() {
+    const { height } = this.canvas;
+    if (this.pinnedCorner.includes('BOTTOM')) {
+      return (height/2) - this.pinMargin;
+    }
+    return -(height/2) + this.pinMargin;
+  }
+
   render() {
     this.draw();
     return this;
@@ -69,6 +96,10 @@ class Grid extends Base {
 
   // re-evaluate lines, calc options for renderer
   update2(center) {
+    if (this.isPinned) {
+      center.x = this.getPinnedX();
+      center.y = this.getPinnedY();
+    }
     const shape = [this.canvas.width, this.canvas.height];
     Object.assign(this.center, center);
     // recalc state
@@ -227,6 +258,10 @@ class Grid extends Base {
         zoom: 1,
         zoomEnabled: true,
         panEnabled: true,
+        
+        pinnedCorner: 'NONE',
+        isPinned: false,
+        pinMargin: 0,
 
         // labels
         labels: true,

@@ -1,4 +1,4 @@
-import panzoom from '../lib/panzoom';
+import panzoom from '../lib/panzoom'; // a smooth customer
 import { clamp } from '../lib/mumath/index';
 
 import Base from '../core/Base';
@@ -51,11 +51,6 @@ export class Map extends mix(Base).with(ModesMixin) {
       x: this.originX,
       y: this.originY
     });
-
-    // this.center = {
-    //   x: this.canvas.width / 2.0,
-    //   y: this.canvas.height / 2.0
-    // };
 
     this.x = this.center.x;
     this.y = this.center.y;
@@ -258,19 +253,11 @@ export class Map extends mix(Base).with(ModesMixin) {
     const canvas = this.canvas;
 
     if (this.grid) {
-      if (this.isPinned) {
-        this.grid.update2({
-          x: this.getPinnedX(),
-          y: this.getPinnedY(),
-          zoom: this.zoom
-        });
-      } else {
-        this.grid.update2({
-          x: this.center.x,
-          y: this.center.y,
-          zoom: this.zoom
-        })
-      }
+      this.grid.update2({
+        x: this.center.x,
+        y: this.center.y,
+        zoom: this.zoom
+      });
     }
 
     this.emit('update', this);
@@ -279,7 +266,7 @@ export class Map extends mix(Base).with(ModesMixin) {
       this.grid.render();
     }
 
-    canvas.zoomToPoint(new Point(this.x, this.y), this.zoom);
+    // canvas.zoomToPoint(new Point(this.x, this.y), this.zoom);
 
     if (this.isGrabMode() || this.isRight) {
       canvas.relativePan(new Point(this.dx, this.dy));
@@ -337,6 +324,7 @@ export class Map extends mix(Base).with(ModesMixin) {
       const ty = oY - e.y / height;
       y -= height * (curZoom - prevZoom) * ty;
     }
+
     this.center.setX(x);
     this.center.setY(y);
     this.zoom = 1 / curZoom;
@@ -345,7 +333,7 @@ export class Map extends mix(Base).with(ModesMixin) {
     this.x = e.x0;
     this.y = e.y0;
     this.isRight = e.isRight;
-    this.isRight = e.isRight;
+
     this.update();
   }
 
@@ -373,29 +361,15 @@ export class Map extends mix(Base).with(ModesMixin) {
   }
 
   setOriginPin(corner) {
-    this.isPinned = corner !== 'NONE';
-    this.pinnedCorner = corner;
+    if (this.grid) {
+      this.grid.setOriginPin(corner);
+    }
   }
 
   setPinMargin(margin) {
-    this.pinMargin = margin;
-    this.emit('pinmargin:change', margin);
-  }
-
-  getPinnedX() {
-    const { width } = this.canvas;
-    if (this.pinnedCorner.includes('RIGHT')) {
-      return -((width/2) - this.pinMargin);
+    if (this.grid) {
+      this.grid.setPinMargin(margin);
     }
-    return ((width/2) - this.pinMargin);
-  }
-
-  getPinnedY() {
-    const { height } = this.canvas;
-    if (this.pinnedCorner.includes('BOTTOM')) {
-      return (height/2) - this.pinMargin;
-    }
-    return -(height/2) + this.pinMargin;
   }
 
   registerListeners() {
