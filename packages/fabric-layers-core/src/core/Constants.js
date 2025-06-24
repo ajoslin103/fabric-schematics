@@ -7,6 +7,14 @@ export const Modes = {
   DRAW: 'DRAW'
 };
 
+export const OriginPin = {
+  NONE: 'NONE',
+  TOP_LEFT: 'TOP_LEFT',
+  TOP_RIGHT: 'TOP_RIGHT',
+  BOTTOM_LEFT: 'BOTTOM_LEFT',
+  BOTTOM_RIGHT: 'BOTTOM_RIGHT'
+};
+
 export const MAP = {
   center: new Point(),
   zoom: 1,
@@ -16,7 +24,9 @@ export const MAP = {
   zoomEnabled: true,
   selectEnabled: true,
   mode: Modes.SELECT,
-  showGrid: true
+  showGrid: true,
+  originPin: OriginPin.NONE,
+  enablePan: true
 };
 
 export const MARKER = {

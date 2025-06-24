@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Map } from '../Map';
+import { Grid } from '../Map/Grid';
 import styled from '@emotion/styled';
 
 const DemoContainer = styled.div`
@@ -165,7 +166,11 @@ export const GridDemo: React.FC = () => {
           height={600}
           onReady={handleMapReady}
           defaultMode="GRAB"
-        />
+          minZoom={minZoom}
+          maxZoom={maxZoom}
+        >
+          <Grid />
+        </Map>
       </CanvasContainer>
     </DemoContainer>
   );

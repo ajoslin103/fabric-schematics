@@ -11,7 +11,7 @@ export { version };
 
 // Log version info if in browser environment
 if (typeof window !== 'undefined') {
-  console.log('fabricJS ', fabric.version);
+  // fabric-pure-browser may not expose version the same way
   console.log('fabric-layers ', version);
 }
 
@@ -36,13 +36,24 @@ export * from './measurement/index';
 // Paint tools
 export * from './paint/index';
 
+// Import what we need for the browser
+import { Map } from './map/Map';
+import { OriginPin } from './core/Constants';
+
+// Collect all exports
+const allExports = {
+  version,
+  Map,
+  OriginPin
+};
+
 // If we're in a browser environment, add to global scope
 // But provide a noConflict method
 if (typeof window !== 'undefined') {
   const oldFabricLayers = window.FabricLayers;
   
-  // Create namespace if using UMD build
-  window.FabricLayers = window.FabricLayers || exports;
+  // Create namespace
+  window.FabricLayers = allExports;
   
   // Provide noConflict method
   window.FabricLayers.noConflict = function() {
@@ -50,3 +61,5 @@ if (typeof window !== 'undefined') {
     return this;
   };
 }
+
+export default allExports;

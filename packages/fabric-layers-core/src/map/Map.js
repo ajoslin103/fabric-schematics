@@ -1,4 +1,4 @@
-import panzoom from '../lib/panzoom';
+import panzoom from '../lib/panzoom'; // a smooth customer
 import { clamp } from '../lib/mumath/index';
 
 import Base from '../core/Base';
@@ -14,6 +14,8 @@ export class Map extends mix(Base).with(ModesMixin) {
     super(options);
 
     this.defaults = Object.assign({}, MAP);
+    this.isPinned = false;
+    this.pinMargin = 0;
 
     // set defaults
     Object.assign(this, this.defaults);
@@ -49,11 +51,6 @@ export class Map extends mix(Base).with(ModesMixin) {
       x: this.originX,
       y: this.originY
     });
-
-    // this.center = {
-    //   x: this.canvas.width / 2.0,
-    //   y: this.canvas.height / 2.0
-    // };
 
     this.x = this.center.x;
     this.y = this.center.y;
@@ -125,7 +122,9 @@ export class Map extends mix(Base).with(ModesMixin) {
     if (index !== undefined) {
       obj.zIndex = index;
     }
-    this.canvas.moveTo(obj.shape, obj.zIndex);
+    if (!this.isPinned) {
+      this.canvas.moveTo(obj.shape, obj.zIndex);
+    }
   }
 
   cloneCanvas(canvas) {
@@ -260,12 +259,14 @@ export class Map extends mix(Base).with(ModesMixin) {
         zoom: this.zoom
       });
     }
+
     this.emit('update', this);
+    
     if (this.grid) {
       this.grid.render();
     }
 
-    canvas.zoomToPoint(new Point(this.x, this.y), this.zoom);
+    // canvas.zoomToPoint(new Point(this.x, this.y), this.zoom);
 
     if (this.isGrabMode() || this.isRight) {
       canvas.relativePan(new Point(this.dx, this.dy));
@@ -297,9 +298,7 @@ export class Map extends mix(Base).with(ModesMixin) {
   }
 
   panzoom(e) {
-    // enable interactions
     const { width, height } = this.canvas;
-    // shift start
     const zoom = clamp(-e.dz, -height * 0.75, height * 0.75) / height;
 
     const prevZoom = 1 / this.zoom;
@@ -325,6 +324,7 @@ export class Map extends mix(Base).with(ModesMixin) {
       const ty = oY - e.y / height;
       y -= height * (curZoom - prevZoom) * ty;
     }
+
     this.center.setX(x);
     this.center.setY(y);
     this.zoom = 1 / curZoom;
@@ -333,7 +333,7 @@ export class Map extends mix(Base).with(ModesMixin) {
     this.x = e.x0;
     this.y = e.y0;
     this.isRight = e.isRight;
-    this.isRight = e.isRight;
+
     this.update();
   }
 
@@ -358,6 +358,18 @@ export class Map extends mix(Base).with(ModesMixin) {
     setTimeout(() => {
       this.update();
     }, 0);
+  }
+
+  setOriginPin(corner) {
+    if (this.grid) {
+      this.grid.setOriginPin(corner);
+    }
+  }
+
+  setPinMargin(margin) {
+    if (this.grid) {
+      this.grid.setPinMargin(margin);
+    }
   }
 
   registerListeners() {

@@ -18,6 +18,38 @@ class Grid extends Base {
     this.update(opts);
   }
 
+  setOriginPin(corner) {
+    this.isPinned = corner !== 'NONE';
+    this.pinnedCorner = corner;
+    this.emit('originpin:change', corner);
+    this.pinnedAbsolute = { x: this.getPinnedX(), y: this.getPinnedY() }
+  }
+
+  setPinMargin(margin) {
+    this.pinMargin = margin;
+    this.emit('pinmargin:change', margin);
+  }
+
+  getPinnedX() {
+    const { width } = this.canvas;
+    const effectiveWidth = width / this.center.zoom;
+    const scaledMargin = this.pinMargin / this.center.zoom;
+    if (this.pinnedCorner.includes('RIGHT')) {
+      return -((effectiveWidth/2) - scaledMargin);
+    }
+    return ((effectiveWidth/2) - scaledMargin);
+  }
+
+  getPinnedY() {
+    const { height } = this.canvas;
+    const effectiveHeight = height / this.center.zoom;
+    const scaledMargin = this.pinMargin / this.center.zoom;
+    if (this.pinnedCorner.includes('BOTTOM')) { 
+      return (effectiveHeight/2) - scaledMargin;
+    }
+    return -(effectiveHeight/2) + scaledMargin;
+  }
+
   render() {
     this.draw();
     return this;
@@ -69,6 +101,10 @@ class Grid extends Base {
 
   // re-evaluate lines, calc options for renderer
   update2(center) {
+    if (this.isPinned) {
+      center.x = this.getPinnedX();
+      center.y = this.getPinnedY();
+    }
     const shape = [this.canvas.width, this.canvas.height];
     Object.assign(this.center, center);
     // recalc state
@@ -176,7 +212,7 @@ class Grid extends Base {
       state.ticks = Array(lines.length).fill(0);
     }
     if (isObj(labels)) {
-      state.labels = Array(lines.length).fill(null);
+      state.labels = Array(state.lines.length).fill(null);
     }
     if (isObj(ticks)) {
       // eslint-disable-next-line guard-for-in
@@ -227,6 +263,11 @@ class Grid extends Base {
         zoom: 1,
         zoomEnabled: true,
         panEnabled: true,
+
+        pinnedCorner: 'NONE',
+        pinnedAbsolute: { x: 0, y: 0 },
+        isPinned: false,
+        pinMargin: 0,
 
         // labels
         labels: true,
