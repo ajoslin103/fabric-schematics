@@ -22,6 +22,7 @@ class Grid extends Base {
     this.isPinned = corner !== 'NONE';
     this.pinnedCorner = corner;
     this.emit('originpin:change', corner);
+    this.pinnedAbsolute = { x: this.getPinnedX(), y: this.getPinnedY() }
   }
 
   setPinMargin(margin) {
@@ -31,18 +32,20 @@ class Grid extends Base {
 
   getPinnedX() {
     const { width } = this.canvas;
+    const effectiveWidth = width / this.center.zoom;
     if (this.pinnedCorner.includes('RIGHT')) {
-      return -((width/2) - this.pinMargin);
+      return -((effectiveWidth/2) - this.pinMargin);
     }
-    return ((width/2) - this.pinMargin);
+    return ((effectiveWidth/2) - this.pinMargin);
   }
 
   getPinnedY() {
     const { height } = this.canvas;
-    if (this.pinnedCorner.includes('BOTTOM')) {
-      return (height/2) - this.pinMargin;
+    const effectiveHeight = height / this.center.zoom;
+    if (this.pinnedCorner.includes('BOTTOM')) { 
+      return (effectiveHeight/2) - this.pinMargin;
     }
-    return -(height/2) + this.pinMargin;
+    return -(effectiveHeight/2) + this.pinMargin;
   }
 
   render() {
@@ -207,7 +210,7 @@ class Grid extends Base {
       state.ticks = Array(lines.length).fill(0);
     }
     if (isObj(labels)) {
-      state.labels = Array(lines.length).fill(null);
+      state.labels = Array(state.lines.length).fill(null);
     }
     if (isObj(ticks)) {
       // eslint-disable-next-line guard-for-in
@@ -258,8 +261,9 @@ class Grid extends Base {
         zoom: 1,
         zoomEnabled: true,
         panEnabled: true,
-        
+
         pinnedCorner: 'NONE',
+        pinnedAbsolute: { x: 0, y: 0 },
         isPinned: false,
         pinMargin: 0,
 
