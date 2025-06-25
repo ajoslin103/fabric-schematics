@@ -1,11 +1,18 @@
-import { createContext, useContext, useRef, useEffect } from 'react';
+import * as React from 'react';
+import { createContext, useContext, useRef, useEffect, ReactNode } from 'react';
 import * as FabricLayers from 'fabric-layers-core';
 
-const FabricContext = createContext(null);
+interface FabricMapProps {
+  width?: number;
+  height?: number;
+  children?: ReactNode;
+}
 
-export const FabricMap = ({ width = 800, height = 600, children }) => {
-  const containerRef = useRef(null);
-  const mapRef = useRef(null);
+const FabricContext = createContext<FabricLayers.Map | null>(null);
+
+export const FabricMap: React.FC<FabricMapProps> = ({ width = 800, height = 600, children }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<FabricLayers.Map | null>(null);
 
   useEffect(() => {
     if (containerRef.current && !mapRef.current) {
@@ -16,14 +23,18 @@ export const FabricMap = ({ width = 800, height = 600, children }) => {
         mode: 'GRAB'
       });
     }
-    return () => mapRef.current?.dispose();
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.dispose();
+      }
+    };
   }, []);
 
-  return (
-    <FabricContext.Provider value={mapRef.current}>
-      <div ref={containerRef} />
-      {children}
-    </FabricContext.Provider>
+  return React.createElement(
+    FabricContext.Provider,
+    { value: mapRef.current },
+    React.createElement('div', { ref: containerRef }),
+    children
   );
 };
 
