@@ -319,9 +319,17 @@ export class Map extends mix(Base).with(ModesMixin) {
     }
 
     if (this.zoomEnabled) {
-      const tx = e.x / width - oX;
+      let tx, ty;
+      if (this.grid && this.grid.zoomOverMouse) {
+        // Zoom centered on mouse position
+        tx = e.x / width - oX;
+        ty = oY - e.y / height;
+      } else {
+        // Zoom centered on viewport center
+        tx = 0;
+        ty = 0;
+      }
       x -= width * (curZoom - prevZoom) * tx;
-      const ty = oY - e.y / height;
       y -= height * (curZoom - prevZoom) * ty;
     }
 
@@ -369,6 +377,12 @@ export class Map extends mix(Base).with(ModesMixin) {
   setPinMargin(margin) {
     if (this.grid) {
       this.grid.setPinMargin(margin);
+    }
+  }
+
+  setZoomOverMouse(followMouse) {
+    if (this.grid) {
+      this.grid.setZoomOverMouse(followMouse);
     }
   }
 
@@ -458,95 +472,6 @@ export class Map extends mix(Base).with(ModesMixin) {
         }
       }
       this.update();
-    });
-
-    this.canvas.on('selection:cleared', e => {
-      const objects = e.deselected;
-      if (!objects || !objects.length) return;
-      for (let i = 0; i < objects.length; i += 1) {
-        const object = objects[i];
-        if (object.class === 'marker') {
-          object._set('angle', 0);
-          object._set('scaleX', 1 / vm.zoom);
-          object._set('scaleY', 1 / vm.zoom);
-          if (object.parent) {
-            object.parent.inGroup = false;
-          }
-          object.fire('moving', object.parent);
-        }
-      }
-    });
-    this.canvas.on('selection:created', e => {
-      const objects = e.selected;
-      if (!objects || objects.length < 2) return;
-      for (let i = 0; i < objects.length; i += 1) {
-        const object = objects[i];
-        if (object.class && object.parent) {
-          object.parent.inGroup = true;
-          object.orgYaw = object.parent.yaw || 0;
-        }
-      }
-    });
-    this.canvas.on('selection:updated', e => {
-      const objects = e.selected;
-      if (!objects || objects.length < 2) return;
-      for (let i = 0; i < objects.length; i += 1) {
-        const object = objects[i];
-        if (object.class && object.parent) {
-          object.parent.inGroup = true;
-          object.orgYaw = object.parent.yaw || 0;
-        }
-      }
-    });
-
-    this.canvas.on('mouse:down', e => {
-      vm.dragObject = e.target;
-    });
-
-    this.canvas.on('mouse:move', e => {
-      if (this.isMeasureMode()) {
-        this.measurement.onMouseMove(e);
-      }
-      if (vm.dragObject && vm.dragObject.clickable) {
-        if (vm.dragObject === e.target) {
-          vm.dragObject.dragging = true;
-        } else {
-          vm.dragObject.dragging = false;
-        }
-      }
-      this.isRight = false;
-      if ('which' in e.e) {
-        // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
-        this.isRight = e.e.which === 3;
-      } else if ('button' in e.e) {
-        // IE, Opera
-        this.isRight = e.e.button === 2;
-      }
-
-      vm.emit('mouse:move', e);
-    });
-
-    this.canvas.on('mouse:up', e => {
-      if (this.isMeasureMode()) {
-        this.measurement.onClick(e);
-      }
-
-      this.isRight = false;
-      this.dx = 0;
-      this.dy = 0;
-
-      if (!vm.dragObject || !e.target || !e.target.selectable) {
-        e.target = null;
-        vm.emit('mouse:click', e);
-      }
-      if (vm.dragObject && vm.dragObject.clickable) {
-        if (vm.dragObject !== e.target) return;
-        if (!vm.dragObject.dragging && !vm.modeToggleByKey) {
-          vm.emit(`${vm.dragObject.class}:click`, vm.dragObject.parent);
-        }
-        vm.dragObject.dragging = false;
-      }
-      vm.dragObject = null;
     });
 
     window.addEventListener('resize', () => {

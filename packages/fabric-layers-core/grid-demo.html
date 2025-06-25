@@ -36,6 +36,9 @@
         <label style="margin-right:10px;">
           Pin Margin: <input id="pinMarginInput" type="number" step="1" value="10" style="width:70px;">
         </label>
+        <label style="margin-right:10px;">
+          <input id="zoomOverMouse" type="checkbox" checked> Zoom Follows Mouse
+        </label>
         <br><br>
         <span id="coordinates">X: 0, Y: 0</span>
         <span id="zoomLevel" style="margin-left: 20px; font-family: monospace;">Zoom: 1.00x</span>
@@ -90,6 +93,7 @@
         // Wire pin select & margin
         const pinSelect = document.getElementById('pinSelect');
         const pinMarginInput = document.getElementById('pinMarginInput');
+        const zoomOverMouseInput = document.getElementById('zoomOverMouse');
         pinSelect.addEventListener('change', function() {
           console.log('Pin set:', this.value); 
           map.setOriginPin(this.value);
@@ -97,6 +101,10 @@
         pinMarginInput.addEventListener('change', function() {
           console.log('Margin change:', this.value);
           map.setPinMargin(parseInt(this.value, 10));
+        });
+        zoomOverMouseInput.addEventListener('change', function() {
+          console.log('Zoom over mouse:', this.checked);
+          map.setZoomOverMouse(this.checked);
         });
         // Set initial margin
         map.setPinMargin(parseInt(pinMarginInput.value, 10));
