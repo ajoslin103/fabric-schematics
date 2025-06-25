@@ -16,7 +16,7 @@
     "build:webpack": "webpack --config webpack.config.js",
     "build": "npm run build:types && npm run build:webpack",
     "prepare": "npm run build",
-    "example": "cd example && npm install && npm start",
+    "serve": "webpack serve --config webpack.demo.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

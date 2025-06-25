@@ -1,1 +1,1 @@
-// Export React components for fabric-layers
+export * from './FabricMap';
