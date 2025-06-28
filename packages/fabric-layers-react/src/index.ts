@@ -1,2 +1,2 @@
+// React wrapper components for fabric-layers
 export * from './components';
-export type { Point, StyleProps } from './types';

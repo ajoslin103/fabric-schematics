@@ -7,6 +7,9 @@ const minZoom = ref(0.05)
 const maxZoom = ref(20)
 const coordinates = ref({ x: 0, y: 0 })
 const zoomLevel = ref(1.00)
+const pinOrigin = ref('NONE')
+const pinMargin = ref(10)
+const zoomOverMouse = ref(true)
 let map: any = null
 
 // Container ref
@@ -38,6 +41,21 @@ const updateZoomDisplay = () => {
   if (!map) return
   const zoom = map.zoom || 1
   zoomLevel.value = zoom
+}
+
+const updatePinOrigin = () => {
+  if (!map) return
+  map.setOriginPin(pinOrigin.value)
+}
+
+const updatePinMargin = () => {
+  if (!map) return
+  map.setPinMargin(parseInt(pinMargin.value.toString(), 10))
+}
+
+const updateZoomOverMouse = () => {
+  if (!map) return
+  map.setZoomOverMouse(zoomOverMouse.value)
 }
 
 // Setup map when component mounts
@@ -94,8 +112,10 @@ onMounted(() => {
     }
   })
 
-  // Set initial zoom limits
+  // Set initial values
   updateZoomLimits()
+  updatePinMargin()
+  updateZoomOverMouse()
 })
 </script>
 
@@ -110,6 +130,24 @@ onMounted(() => {
         Max Zoom: <input type="number" step="0.01" v-model="maxZoom" @change="updateZoomLimits" style="width:70px;">
       </label>
       <button @click="resetView">Reset View</button>
+      <br><br>
+      <label style="margin-right:10px;">
+        Pin Origin: 
+        <select v-model="pinOrigin" @change="updatePinOrigin" style="width:100px;">
+          <option value="NONE">None</option>
+          <option value="TOP_LEFT">Top Left</option>
+          <option value="TOP_RIGHT">Top Right</option>
+          <option value="BOTTOM_LEFT">Bottom Left</option>
+          <option value="BOTTOM_RIGHT">Bottom Right</option>
+        </select>
+      </label>
+      <label style="margin-right:10px;">
+        Pin Margin: <input type="number" step="1" v-model="pinMargin" @change="updatePinMargin" style="width:70px;">
+      </label>
+      <label style="margin-right:10px;">
+        <input type="checkbox" v-model="zoomOverMouse" @change="updateZoomOverMouse"> Zoom Follows Mouse
+      </label>
+      <br><br>
       <span class="coordinates">X: {{ coordinates.x }}, Y: {{ coordinates.y }}</span>
       <span class="zoom-level">Zoom: {{ zoomLevel.toFixed(2) }}x</span>
     </div>

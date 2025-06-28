@@ -5,10 +5,10 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 module.exports = {
   mode: 'development',
   devtool: 'source-map',
-  entry: './src/demo.ts',
+  entry: './src/index.ts',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'demo.js',
+    filename: 'index.umd.js',
     library: 'FabricLayersReact',
     libraryTarget: 'umd',
     globalObject: 'this'

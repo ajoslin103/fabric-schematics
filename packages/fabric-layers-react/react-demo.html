@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fabric-layers React Demo</title>
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+        .canvas-container { border: 1px solid #ccc; margin: 20px 0; background: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- React -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Fabric -->
+    <script src="https://cdn.jsdelivr.net/npm/fabric-pure-browser@5.1.0/dist/fabric.min.js"></script>
+    <!-- Our library -->
+    <script src="../dist/index.umd.js"></script>
+
+    <script type="text/babel">
+        const { FabricMap } = FabricLayersReact;
+        
+        function Demo() {
+            return (
+                <div>
+                    <h1>fabric-layers React Demo</h1>
+                    <FabricMap width={800} height={600} />
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<Demo />);
+    </script>
+</body>
+</html>
