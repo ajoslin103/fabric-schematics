@@ -27,8 +27,8 @@ To explore the grid functionality, follow these steps:
      - Reset view button
 
 4. **Development Workflow**
+   - cd ../fabric-layers-core && npm run build:watch
    - Make changes to the source code
-   - Rebuild with `yarn build`
    - Refresh the browser to see changes
 
 

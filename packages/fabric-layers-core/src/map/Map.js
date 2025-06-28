@@ -14,11 +14,13 @@ export class Map extends mix(Base).with(ModesMixin) {
     super(options);
 
     this.defaults = Object.assign({}, MAP);
-    this.isPinned = false;
-    this.pinMargin = 0;
-
+    
     // set defaults
     Object.assign(this, this.defaults);
+
+    this.originPin = 'NONE';
+    this.pinMargin = 10;
+    this.zoomOverMouse = true;
 
     // overwrite options
     Object.assign(this, this._options);
@@ -115,6 +117,12 @@ export class Map extends mix(Base).with(ModesMixin) {
     this.gridCanvas = this.cloneCanvas();
     this.gridCanvas.setAttribute('id', 'fabric-layers-grid-canvas');
     this.grid = new Grid(this.gridCanvas, this);
+    
+    // Set grid properties from map settings
+    this.grid.setOriginPin(this.originPin);
+    this.grid.setPinMargin(this.pinMargin);
+    this.grid.setZoomOverMouse(this.zoomOverMouse);
+    
     this.grid.draw();
   }
 
@@ -122,7 +130,7 @@ export class Map extends mix(Base).with(ModesMixin) {
     if (index !== undefined) {
       obj.zIndex = index;
     }
-    if (!this.isPinned) {
+    if (!this.grid || !this.grid.isPinned) {
       this.canvas.moveTo(obj.shape, obj.zIndex);
     }
   }
@@ -369,18 +377,21 @@ export class Map extends mix(Base).with(ModesMixin) {
   }
 
   setOriginPin(corner) {
-    if (this.grid) {
+    this.originPin = corner;
+    if (this.grid) {  
       this.grid.setOriginPin(corner);
     }
   }
 
   setPinMargin(margin) {
+    this.pinMargin = margin;
     if (this.grid) {
       this.grid.setPinMargin(margin);
     }
   }
 
   setZoomOverMouse(followMouse) {
+    this.zoomOverMouse = followMouse;
     if (this.grid) {
       this.grid.setZoomOverMouse(followMouse);
     }

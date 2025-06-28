@@ -20,6 +20,9 @@ export interface GridOptions {
   max?: number;
   offset?: number;
   zoom?: number;
+  originPin?: 'NONE';
+  pinMargin?: number;
+  zoomOverMouse?: boolean;
 }
 
 export interface GridState {
@@ -42,6 +45,9 @@ export interface GridState {
   ticks: (number | null)[];
   labels: (string | null)[];
   opposite?: GridState;
+  originPin: 'NONE';
+  pinMargin: number;
+  zoomOverMouse: boolean;
 }
 
 export default class Grid {
@@ -75,4 +81,7 @@ export default class Grid {
   on(event: string, callback: (...args: any[]) => void): this;
   off(event: string, callback?: (...args: any[]) => void): this;
   emit(event: string, ...args: any[]): boolean;
+  setOriginPin(value: 'NONE'): void;
+  setPinMargin(value: number): void;
+  setZoomOverMouse(value: boolean): void;
 }
