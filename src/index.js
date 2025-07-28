@@ -3,7 +3,6 @@
  * Main entry point that re-exports all functionality
  */
 
-import fabric from 'fabric-pure-browser';
 import { version } from '../package.json';
 
 // Export version info
@@ -11,8 +10,7 @@ export { version };
 
 // Log version info if in browser environment
 if (typeof window !== 'undefined') {
-  // fabric-pure-browser may not expose version the same way
-  console.log('fabric-layers ', version);
+  console.log('fabric-layers-core ', version);
 }
 
 // Core components
