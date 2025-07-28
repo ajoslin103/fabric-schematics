@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.11](https://github.com/ajoslin103/fabric-layers-core/compare/v1.1.10...v1.1.11) (2025-07-28)
+
 ### [1.1.10](https://github.com/ajoslin103/fabric-layers-core/compare/v1.1.9...v1.1.10) (2025-07-28)
 
 ### [1.1.9](https://github.com/ajoslin103/fabric-layers-core/compare/v1.1.8...v1.1.9) (2025-07-28)
