@@ -47,22 +47,28 @@
 
     <!-- Load fabric-pure-browser from CDN -->
     <script src="https://cdn.jsdelivr.net/npm/fabric-pure-browser@5.1.0/dist/fabric.min.js"></script>
-    <!-- Load our library from dist -->
-    <script src="./dist/index.umd.js"></script>
-    <!-- Development script - will be ignored in production -->
-    <script>
-      // Development helper to detect if the library is loaded
-      window.addEventListener('load', function() {
-        if (!window.FabricLayers) {
-          console.error('FabricLayers not found. Make sure to run `npm run build` first.');
-          alert('Error: FabricLayers not found. Please run `npm run build` in the package directory first.');
-        }
-      });
-    </script>
+
+
+    <!-- load fabric-layers-core from https://www.npmjs.com/package/fabric-layers/v/1.1.9 -->
+    <script src="https://cdn.jsdelivr.net/npm/fabric-layers@1.1.9/dist/index.umd.js"></script>
+
+    <!-- load fabric-layers-core from local build with cache busting -->
+    <!-- <script src="dist/index.umd.js?v=20240727203000"></script> -->
     
     <script>
       // Wait for DOM
       window.addEventListener('DOMContentLoaded', function() {
+
+        console.log('fabric available?', !!window.fabric);
+        console.log('EventEmitter2 available?', !!window.EventEmitter2);
+        console.log('FabricLayers object:', window.FabricLayers);
+        
+        if (window.FabricLayers) {
+          console.log('FabricLayers keys:', Object.keys(window.FabricLayers));
+          console.log('Map constructor available?', !!window.FabricLayers.Map);
+          console.log('map function available?', typeof window.FabricLayers.map === 'function');
+        }
+
         // Get container
         const container = document.getElementById('canvas-container');
 
