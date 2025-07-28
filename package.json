@@ -94,6 +94,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "canvas": "^3.1.2",
     "eventemitter2": "^6.4.9",
     "fabric": "^6.7.1"
   },

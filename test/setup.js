@@ -9,9 +9,6 @@ global.window = dom.window;
 global.document = dom.window.document;
 global.Document = dom.window.Document;  // Added for fabric.js
 global.HTMLDocument = dom.window.HTMLDocument;  // Added for fabric.js
-global.navigator = {
-  userAgent: 'node.js',
-};
 
 // Needed for fabric.js
 global.HTMLCanvasElement = window.HTMLCanvasElement;

@@ -3,6 +3,7 @@
 import chai from 'chai';
 import { fabric } from 'fabric';
 import { Map, Marker } from '../src';
+import { FabricLayersPaintingCanvas } from '../src/paint/Canvas';
 
 window.fabric = fabric;
 
@@ -14,13 +15,13 @@ let lib;
 describe('Map Class Tests', () => {
   before(() => {
     lib = new Map({
-      canvas: new fabric.Canvas(document.createElement('canvas'))
+      canvas: new FabricLayersPaintingCanvas(document.createElement('canvas'))
     });
   });
   
   it('should initialize with a canvas', () => {
     expect(lib.canvas).to.exist;
-    expect(lib.canvas).to.be.instanceof(fabric.Canvas);
+    expect(lib.canvas).to.be.instanceof(FabricLayersPaintingCanvas);
   });
 });
 
