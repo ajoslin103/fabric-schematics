@@ -1,4 +1,4 @@
-# Fabric Layers v1.1.5
+# Fabric Layers
 
 An interactive coordinate-plane, grid, and layer management library for [fabric.js](https://fabricjs.com/) canvases.
 
