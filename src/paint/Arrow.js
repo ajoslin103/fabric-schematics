@@ -1,6 +1,8 @@
-import ArrowHead from './ArrowHead';
 
-export class Arrow extends fabric.Group {
+import ArrowHead from './ArrowHead';
+import { Group } from 'fabric';
+
+export class Arrow extends Group {
   constructor(point, options) {
     options = options || {};
     options.strokeWidth = options.strokeWidth || 5;

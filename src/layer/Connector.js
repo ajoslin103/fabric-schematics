@@ -1,5 +1,5 @@
 import { Layer } from './Layer';
-import { Line } from './vector/Line';
+import { FabricLayersLine } from './vector/Line';
 
 export class Connector extends Layer {
   constructor(start, end, options) {
@@ -46,7 +46,7 @@ export class Connector extends Layer {
   }
 
   draw() {
-    this.shape = new Line(
+    this.shape = new FabricLayersLine(
       [this.start.position.x, this.start.position.y, this.end.position.x, this.end.position.y],
       this.style
     );

@@ -1,13 +1,13 @@
 import { Layer } from './Layer';
-import { Group } from './Group';
-import { Point } from '../geometry/Point';
+import { FabricLayersGroup } from './Group';
+import { FabricLayersPoint } from '../geometry/Point';
 
 class Tooltip extends Layer {
   constructor(position, options) {
     options = options || {};
     options.zIndex = options.zIndex || 300;
     options.keepOnZoom = true;
-    options.position = new Point(position);
+    options.position = new FabricLayersPoint(position);
     options.class = 'tooltip';
     super(options);
 
@@ -36,7 +36,7 @@ class Tooltip extends Layer {
     if (this.textObj) {
       objects.push(this.textObj);
     }
-    this.shape = new Group(objects, this.style);
+    this.shape = new FabricLayersGroup(objects, this.style);
     process.nextTick(() => {
       this.emit('ready');
     });

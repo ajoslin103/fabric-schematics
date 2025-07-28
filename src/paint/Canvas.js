@@ -2,6 +2,14 @@
 import Base from '../core/Base';
 import { Arrow } from './Arrow';
 
+import {
+  Canvas,
+  Circle,
+  IText,
+  Path,
+  StaticCanvas,
+} from 'fabric';
+
 const Modes = {
   SELECT: 'select',
   DRAWING: 'drawing',
@@ -9,11 +17,11 @@ const Modes = {
   TEXT: 'text'
 };
 
-export class Canvas extends Base {
+export class FabricLayersPaintingCanvas extends Base {
   constructor(container, options) {
     super(options);
 
-    this.container = container;
+    this.container = container; // DOM element
 
     const canvas = document.createElement('canvas');
     this.container.appendChild(canvas);
@@ -25,7 +33,7 @@ export class Canvas extends Base {
     this.currentColor = this.currentColor || 'black';
     this.fontFamily = this.fontFamily || 'Roboto';
 
-    this.canvas = new fabric.Canvas(canvas, {
+    this.canvas = new Canvas(canvas, {
       freeDrawingCursor: 'none',
       freeDrawingLineWidth: this.lineWidth
     });
@@ -147,7 +155,7 @@ export class Canvas extends Base {
       const mouse = canvas.getPointer(event.e);
       if (event.target) return;
       if (this.isTextMode()) {
-        const text = new fabric.IText('Text', {
+        const text = new IText('Text', {
           left: mouse.x,
           top: mouse.y,
           width: 100,
@@ -216,20 +224,20 @@ export class Canvas extends Base {
     const cursorOpacity = 0.3;
     let mousecursor = null;
     if (this.isDrawingMode()) {
-      mousecursor = new fabric.Circle({
+      mousecursor = new Circle({
         left: -1000,
         top: -1000,
-        radius: canvas.freeDrawingBrush.width / 2,
+        radius: canvas.freeDrawingBrushWidth / 2,
         fill: `rgba(255,0,0,${cursorOpacity})`,
         stroke: 'black',
         originX: 'center',
         originY: 'center'
       });
     } else if (this.isTextMode()) {
-      mousecursor = new fabric.Path('M0,-10 V10', {
+      mousecursor = new Path('M0,-10 V10', {
         left: -1000,
         top: -1000,
-        radius: canvas.freeDrawingBrush.width / 2,
+        radius: canvas.freeDrawingBrushWidth / 2,
         fill: `rgba(255,0,0,${cursorOpacity})`,
         stroke: `rgba(0,0,0,${cursorOpacity})`,
         originX: 'center',
@@ -238,10 +246,10 @@ export class Canvas extends Base {
         scaleY: 1
       });
     } else {
-      mousecursor = new fabric.Path('M0,-10 V10 M-10,0 H10', {
+      mousecursor = new Path('M0,-10 V10 M-10,0 H10', {
         left: -1000,
         top: -1000,
-        radius: canvas.freeDrawingBrush.width / 2,
+        radius: canvas.freeDrawingBrushWidth / 2,
         fill: `rgba(255,0,0,${cursorOpacity})`,
         stroke: `rgba(0,0,0,${cursorOpacity})`,
         originX: 'center',
@@ -273,7 +281,7 @@ export class Canvas extends Base {
     cursorCanvas.height = this.height || this.container.clientHeight;
     this.cursorCanvas = cursorCanvas;
     canvas.defaultCursor = 'none';
-    this.cursor = new fabric.StaticCanvas(cursorCanvas);
+    this.cursor = new StaticCanvas(cursorCanvas);
     this.updateCursor();
   }
 
@@ -302,7 +310,7 @@ export class Canvas extends Base {
 
   setLineWidth(width) {
     this.lineWidth = width;
-    this.canvas.freeDrawingBrush.width = width;
+    this.canvas.freeDrawingBrushWidth = width;
 
     if (!this.mousecursor) return;
 
@@ -331,4 +339,4 @@ export class Canvas extends Base {
   }
 }
 
-export const canvas = (container, options) => new Canvas(container, options);
+export default FabricLayersPaintingCanvas;

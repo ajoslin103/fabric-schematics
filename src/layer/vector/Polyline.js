@@ -1,6 +1,6 @@
 import { Layer } from '../Layer';
-import { Point } from '../../geometry/Point';
-import { Group } from '../Group';
+import { FabricLayersPoint } from '../../geometry/Point';
+import { FabricLayersGroup } from '../Group';
 
 export class Polyline extends Layer {
   constructor(_points, options) {
@@ -17,7 +17,7 @@ export class Polyline extends Layer {
       fill: this.fill || false
     };
 
-    this.shape = new Group([], {
+    this.shape = new FabricLayersGroup([], {
       selectable: false,
       hasControls: false,
       class: this.class,
@@ -28,7 +28,7 @@ export class Polyline extends Layer {
   }
 
   addPoint(point) {
-    this.points.push(new Point(point));
+    this.points.push(new FabricLayersPoint(point));
 
     if (this.points.length > 1) {
       const i = this.points.length - 1;
@@ -51,7 +51,7 @@ export class Polyline extends Layer {
     this.removeLines();
     this.points = [];
     for (let i = 0; i < points.length; i += 1) {
-      const point = new Point(points[i]);
+      const point = new FabricLayersPoint(points[i]);
       this.points.push(point);
       this.addPoint();
     }

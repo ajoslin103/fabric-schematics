@@ -1,4 +1,4 @@
-import { Rect } from '../vector';
+import { FabricLayersRect } from '../vector';
 import { Layer } from '../Layer';
 
 export class MarkerGroup extends Layer {
@@ -42,7 +42,7 @@ export class MarkerGroup extends Layer {
       this.shape.set(this.coords);
     } else {
       Object.assign(this.style, this.coords);
-      this.shape = new Rect(this.style);
+      this.shape = new FabricLayersRect(this.style);
     }
   }
 }

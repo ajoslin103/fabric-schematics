@@ -1,1 +1,1 @@
-export { Point, point } from './Point';
+export *from './Point';

@@ -1,3 +1,4 @@
-export class Circle extends fabric.Circle {}
+import { Circle } from 'fabric';
 
-export const circle = options => new Circle(options);
+export class FabricLayersCircle extends Circle {}
+

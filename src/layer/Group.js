@@ -1,6 +1,7 @@
-import { Point } from '../geometry/Point';
+import { Group } from 'fabric';
+import { FabricLayersPoint } from '../geometry/Point';
 
-export class Group extends fabric.Group {
+export class FabricLayersGroup extends Group {
   constructor(objects, options) {
     options = options || {};
     super(objects, options);
@@ -8,12 +9,12 @@ export class Group extends fabric.Group {
 
   getBounds() {
     const coords = [];
-    coords.push(new Point(this.left - this.width / 2.0, this.top - this.height / 2.0));
-    coords.push(new Point(this.left + this.width / 2.0, this.top + this.height / 2.0));
+    coords.push(new FabricLayersPoint(this.left - this.width / 2.0, this.top - this.height / 2.0));
+    coords.push(new FabricLayersPoint(this.left + this.width / 2.0, this.top + this.height / 2.0));
     return coords;
   }
 }
 
-export const group = (objects, options) => new Group(objects, options);
+export const group = (objects, options) => new FabricLayersGroup(objects, options);
 
-export default Group;
+export default FabricLayersGroup;

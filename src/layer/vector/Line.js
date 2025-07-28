@@ -1,4 +1,6 @@
-export class Line extends fabric.Line {
+import { Line } from 'fabric';
+
+export class FabricLayersLine extends Line {
   constructor(points, options) {
     options = options || {};
     options.strokeWidth = options.strokeWidth || 1;
@@ -15,6 +17,4 @@ export class Line extends fabric.Line {
   }
 }
 
-export const line = (points, options) => new Line(points, options);
-
-export default Line;
+export default FabricLayersLine;

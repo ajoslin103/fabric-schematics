@@ -1,14 +1,15 @@
 import { Layer } from '../Layer';
-import { Group } from '../Group';
-import { Point } from '../../geometry/Point';
+import { FabricLayersGroup } from '../Group';
+import { FabricLayersPoint } from '../../geometry/Point';
 import { Connector } from '../Connector';
+import { FabricLayersCircle } from '../../layer/vector/Circle';
 
 export class Marker extends Layer {
   constructor(position, options) {
     options = options || {};
     options.zIndex = options.zIndex || 100;
     options.keepOnZoom = options.keepOnZoom === undefined ? true : options.keepOnZoom;
-    options.position = new Point(position);
+    options.position = new FabricLayersPoint(position);
     options.rotation = options.rotation || 0;
     options.yaw = options.yaw || 0;
     options.clickable = options.clickable !== undefined ? options.clickable : true;
@@ -55,7 +56,7 @@ export class Marker extends Layer {
         }
       );
     } else {
-      this.circle = new fabric.Circle({
+      this.circle = new FabricLayersCircle({
         radius: this.size,
         strokeWidth: 2,
         stroke: this.stroke,
@@ -76,7 +77,7 @@ export class Marker extends Layer {
     if (this.textObj) {
       objects.push(this.textObj);
     }
-    this.shape = new Group(objects, this.style);
+    this.shape = new FabricLayersGroup(objects, this.style);
     this.links = this.links || [];
     this.addLinks();
     this.registerListeners();
@@ -113,7 +114,7 @@ export class Marker extends Layer {
   }
 
   setPosition(position) {
-    this.position = new Point(position);
+    this.position = new FabricLayersPoint(position);
     if (!this.shape) return;
 
     this.shape.set({
@@ -232,7 +233,7 @@ export class Marker extends Layer {
   onShapeDrag() {
     const matrix = this.shape.calcTransformMatrix();
     const [, , , , x, y] = matrix;
-    this.position = new Point(x, y);
+    this.position = new FabricLayersPoint(x, y);
     this.emit('update:links');
     this.emit('moving');
   }

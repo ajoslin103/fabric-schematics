@@ -1,4 +1,6 @@
-class ArrowHead extends fabric.Triangle {
+import { Triangle } from 'fabric';
+
+class ArrowHead extends Triangle {
   constructor(points, options) {
     options = options || {};
     options.headLength = options.headLength || 10;

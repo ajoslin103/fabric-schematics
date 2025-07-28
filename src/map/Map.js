@@ -4,7 +4,7 @@ import { clamp } from '../lib/mumath/index';
 import Base from '../core/Base';
 import { MAP, Modes } from '../core/Constants';
 import Grid from '../grid/Grid';
-import { Point } from '../geometry/Point';
+import { FabricLayersPoint } from '../geometry/Point';
 import ModesMixin from './ModesMixin';
 import Measurement from '../measurement/Measurement';
 import { mix } from '../lib/mix';
@@ -25,7 +25,7 @@ export class Map extends mix(Base).with(ModesMixin) {
     // overwrite options
     Object.assign(this, this._options);
 
-    this.center = new Point(this.center);
+    this.center = new FabricLayersPoint(this.center);
 
     this.container = container || document.body;
 
@@ -174,7 +174,7 @@ export class Map extends mix(Base).with(ModesMixin) {
       });
     });
 
-    return [new Point(minX, minY), new Point(maxX, maxY)];
+    return [new FabricLayersPoint(minX, minY), new FabricLayersPoint(maxX, maxY)];
   }
 
   fitBounds(padding = 100) {
@@ -217,7 +217,7 @@ export class Map extends mix(Base).with(ModesMixin) {
   reset() {
     const { width, height } = this.canvas;
     this.zoom = this._options.zoom || 1;
-    this.center = new Point();
+    this.center = new FabricLayersPoint();
     this.originX = -this.canvas.width / 2;
     this.originY = -this.canvas.height / 2;
     this.canvas.absolutePan({
@@ -277,7 +277,7 @@ export class Map extends mix(Base).with(ModesMixin) {
     // canvas.zoomToPoint(new Point(this.x, this.y), this.zoom);
 
     if (this.isGrabMode() || this.isRight) {
-      canvas.relativePan(new Point(this.dx, this.dy));
+      canvas.relativePan(new FabricLayersPoint(this.dx, this.dy));
       this.emit('panning');
       this.setCursor('grab');
     } else {
@@ -365,7 +365,7 @@ export class Map extends mix(Base).with(ModesMixin) {
 
     this.center.copy(view);
 
-    this.canvas.relativePan(new Point(dx * this.zoom, dy * this.zoom));
+    this.canvas.relativePan(new FabricLayersPoint(dx * this.zoom, dy * this.zoom));
 
     this.canvas.renderAll();
 

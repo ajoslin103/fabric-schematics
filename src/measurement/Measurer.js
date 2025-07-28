@@ -1,4 +1,4 @@
-import { Point } from '../geometry/Point';
+import { FabricLayersPoint } from '../geometry/Point';
 
 class Measurer {
   constructor(options) {
@@ -38,8 +38,8 @@ class Measurer {
     this.clear();
 
     let { start, end } = this;
-    start = new Point(start);
-    end = new Point(end);
+    start = new FabricLayersPoint(start);
+    end = new FabricLayersPoint(end);
 
     const center = start.add(end).multiply(0.5);
 

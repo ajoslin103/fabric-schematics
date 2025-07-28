@@ -1,4 +1,6 @@
-export class Rect extends fabric.Rect {
+import { Rect } from 'fabric';
+
+export class FabricLayersRect extends Rect {
   constructor(points, options) {
     options = options || {};
     options.strokeWidth = options.strokeWidth || 1;
@@ -13,6 +15,4 @@ export class Rect extends fabric.Rect {
   }
 }
 
-export const rect = (points, options) => new Rect(points, options);
-
-export default Rect;
+export default FabricLayersRect;
