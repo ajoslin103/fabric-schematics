@@ -23,7 +23,7 @@ yarn release
 ```
 
 ```bash
-yarn publish
+git push --follow-tags origin main && npm publish
 ```
 
 You will be prompted to enter a One-Time-Password (OTP) from your GitHub account.
