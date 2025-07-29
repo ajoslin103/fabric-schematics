@@ -4,17 +4,17 @@ module.exports = function(config) {
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '',
 
-    // frameworks to use - using CDN versions instead
-    frameworks: [],
+    // frameworks to use
+    frameworks: ['mocha'],
 
     // list of files / patterns to load in the browser
     files: [
       // Load testing libraries from CDN
-      'https://cdnjs.cloudflare.com/ajax/libs/mocha/10.2.0/mocha.js',
-      'https://cdnjs.cloudflare.com/ajax/libs/chai/4.3.7/chai.js',
+      { pattern: 'https://cdnjs.cloudflare.com/ajax/libs/mocha/10.2.0/mocha.js', included: true, served: false, watched: false },
+      { pattern: 'https://cdnjs.cloudflare.com/ajax/libs/chai/4.3.7/chai.js', included: true, served: false, watched: false },
       // Load fabric.js from CDN
-      'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js',
-      // Test setup file to configure Mocha - IMPORTANT: This must run before test files
+      { pattern: 'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js', included: true, served: false, watched: false },
+      // Test setup file to configure test environment
       { pattern: 'test/karma/test-setup.js', included: true, served: true },
       // Load the distribution build of our library
       { pattern: 'dist/index.umd.js', included: true, served: true },
@@ -42,6 +42,10 @@ module.exports = function(config) {
 
     // web server port
     port: 9876,
+    
+    // increase timeout for disconnects
+    browserDisconnectTimeout: 10000,
+    browserNoActivityTimeout: 60000,
 
     // enable / disable colors in the output (reporters and logs)
     colors: true,
@@ -63,12 +67,13 @@ module.exports = function(config) {
     // how many browser should be started simultaneous
     concurrency: Infinity,
     
-    // Display error details
-    client: {
-      mocha: {
-        reporter: 'html',
-        ui: 'bdd'
-      }
-    }
+    // Karma plugins
+    plugins: [
+      'karma-chrome-launcher',
+      'karma-mocha',
+      'karma-chai'
+    ],
+    
+    // Client already configured above
   });
 };
