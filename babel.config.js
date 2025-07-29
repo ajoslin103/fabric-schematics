@@ -7,7 +7,7 @@ module.exports = {
       },
       useBuiltIns: 'usage',
       corejs: 3,
-      modules: false
+      modules: process.env.NODE_ENV === 'test' ? 'commonjs' : false
     }]
   ],
   plugins: [
