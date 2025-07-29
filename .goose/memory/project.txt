@@ -10,5 +10,5 @@ Project: fabric-layers
   - fabric-layers-core/grid-demo.html
   - fabric-layers-react/plane-demo.html
 - Important: Use fabric-layers components/classes instead of native fabric.js routines
-- Built against fabric-pure-browser to avoid canvas issues in browser
+- Built against fabric@5.5.2-browser to avoid issues with canvas in the browser (note the -browser suffix)
 

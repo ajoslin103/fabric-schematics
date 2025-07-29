@@ -10,7 +10,7 @@
 
 There is a packages folder with two packages that we will build and publish to npmjs.com
 
-NOTE: We are building aginst fabric-pure-browser to avoid issues with canvas in the browser
+NOTE: We are building against fabric@5.5.2-browser to avoid issues with canvas in the browser (note the -browser suffix)
 
 - fabric-layers-core
 

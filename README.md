@@ -1,113 +1,80 @@
-# Fabric Layers Monorepo
+# Fabric Layers
 
-This is a monorepo containing the following packages:
+An interactive coordinate-plane, grid, and layer management library for [fabric.js](https://fabricjs.com/) canvases.
 
-## Packages
+`fabric-layers` is based on the excellent original work of [ReactIndoorMapping](https://github.com/martinwairegi/ReactIndoorMapping) featured in this [blog post](https://blog.logrocket.com/build-indoor-maps-fabric-js-react/). The library has been refactored to be framework-agnostic while maintaining all the features of the original.
 
-### `fabric-layers-core`
-A fabric.js coordinate-plane (grid) & layers library.
+## 🚀 Running the Grid Demo
 
-### `fabric-layers-react`
-React components and hooks for fabric-layers-core.
+To explore the grid functionality, follow these steps:
 
-## Getting Started
-
-### Prerequisites
-- Node.js v22.16.0 (use nvm)
-- Yarn (v1.x recommended)
-
-### Installation
-
-1. Install Node.js v22.16.0 using nvm:
-   ```bash
-   nvm install 22.16.0
-   nvm use
-   ```
-
-2. Install Yarn if you haven't already:
-   ```bash
-   npm install -g yarn
-   ```
-
-3. Install dependencies:
+1. **Install Dependencies**
    ```bash
    yarn install
    ```
 
-4. Build all packages:
+2. **Build the Library**
    ```bash
    yarn build
    ```
 
-## Development
+3. **Open the Demo**
+   - Open `grid-demo.html` directly in your browser
+   - The demo includes:
+     - Interactive grid with zoom/pan functionality
+     - Coordinate display
+     - Zoom level controls
+     - Reset view button
 
-### Building Packages
+4. **Development Workflow**
+   - cd ../fabric-layers-core && npm run build:watch
+   - Make changes to the source code
+   - Refresh the browser to see changes
 
-Build all packages:
-```bash
-yarn build
-```
 
-Build a specific package:
-```bash
-nx build fabric-layers-core
-# or
-nx build fabric-layers-react
-```
+---
 
-### Running Tests
-
-Run tests for all packages:
-```bash
-yarn test
-```
-
-Run tests for a specific package:
-```bash
-nx test fabric-layers-core
-# or
-nx test fabric-layers-react
-```
-
-### Linting
-
-Lint all packages:
-```bash
-yarn lint
-```
-
-Lint a specific package:
-```bash
-nx lint fabric-layers-core
-# or
-nx lint fabric-layers-react
-```
-
-## Project Structure
+## ✨ Classes
 
 ```
-fabric-layers/
-├── packages/
-│   ├── fabric-layers-core/     # Core library
-│   └── fabric-layers-react/    # React bindings
-├── examples/                   # Example applications
-│   ├── fabric-layers-core/     # Core examples
-│   └── fabric-layers-react/    # React examples
-├── tools/                      # Shared tooling
-├── .nvmrc                     # Node.js version
-├── nx.json                    # Nx workspace configuration
-├── package.json               # Root package.json
-└── tsconfig.base.json         # Base TypeScript configuration
+Base (EventEmitter2)
+├── Map (+ ModesMixin)
+│   ├── Grid
+│   ├── Point
+│   └── Measurement
+├── Layer
+│   ├── Vector Layers (Line, Circle, Rect, Polyline)
+│   ├── Marker System
+│   │   ├── Marker
+│   │   ├── MarkerGroup
+│   │   └── Icon
+│   ├── Group
+│   ├── Connector
+│   └── Tooltip
+├── Paint System
+│   ├── Canvas
+│   ├── Arrow
+│   ├── ArrowHead
+│   └── PaintManager
+└── Measurement System
+    ├── Measurement
+    └── Measurer
 ```
 
-## Contributing
+## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+PRs and issues are welcome!
+1. Fork & `git clone`
+2. `npm install`
+3. `npm run dev` – watch/build
+4. Add tests in `test/` and run `npm test`
 
-## License
+Please follow the [Conventional Commits](https://www.conventionalcommits.org/) spec; CI will lint commit messages.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+---
+
+## 📄 Licenses
+
+MIT © 2025 [Allen Joslin](https://github.com/ajoslin103) (current author of fabric-layers)
+
+MIT © 2022 [Martin Wairegi](https://github.com/martinwairegi) (original author of ReactIndoorMapping)

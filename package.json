@@ -1,38 +1,101 @@
 {
-  "name": "fabric-layers",
-  "version": "0.0.1",
-  "license": "MIT",
-  "private": true,
-  "scripts": {
-    "build": "nx run-many --target=build --all",
-    "build:core": "nx build fabric-layers-core",
-    "build:react": "nx build fabric-layers-react",
-    "test": "nx run-many --target=test --all",
-    "test:core": "nx test fabric-layers-core",
-    "test:react": "nx test fabric-layers-react",
-    "lint": "nx run-many --target=lint --all",
-    "lint:core": "nx lint fabric-layers-core",
-    "lint:react": "nx lint fabric-layers-react",
-    "watch": "nx run-many --target=watch --all",
-    "watch:core": "nx watch fabric-layers-core",
-    "watch:react": "nx watch fabric-layers-react"
-  },
-  "devDependencies": {
-    "@nrwl/workspace": "^16.0.0",
-    "@nx/devkit": "^21.2.1",
-    "@nx/eslint": "^21.2.1",
-    "@nx/vite": "^21.2.1",
-    "@nx/vue": "^21.2.1",
-    "eslint": "^9.29.0",
-    "nx": "^21.2.1",
-    "typescript": "^5.0.0",
-    "vite": "^6.3.5",
-    "vitest": "^3.2.4"
-  },
-  "workspaces": [
-    "packages/*"
+  "name": "fabric-layers-core",
+  "version": "1.1.12",
+  "description": "A fabric.js coordinate-plane (grid) & layers library",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/types/index.d.ts",
+  "unpkg": "dist/index.umd.js",
+  "files": [
+    "dist"
   ],
-  "resolutions": {
-    "**/@parcel/watcher": "^2.0.0"
+  "browser": {
+    "./dist/index.cjs.js": "./dist/index.umd.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "clean": "rimraf dist",
+    "lint": "eslint . --ext .js,.jsx",
+    "lint:fix": "yarn lint -- --fix",
+    "format": "prettier --write \"**/*.{js,jsx,json,md}\"",
+    "test": "karma start karma.conf.js --single-run",
+    "test:watch": "karma start karma.conf.js",
+    "build": "yarn clean && rollup -c rollup.config.mjs",
+    "build:watch": "rollup -c rollup.config.mjs -w",
+    "start": "webpack serve --mode=development --open",
+    "prepublishOnly": "yarn build",
+    "prepare": "yarn build",
+    "release": "standard-version",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ajoslin103/fabric-layers-core.git"
+  },
+  "keywords": [
+    "fabric.js",
+    "canvas",
+    "grid",
+    "coordinate-plane",
+    "layers",
+    "axis",
+    "polar",
+    "cartesian"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ajoslin103/fabric-layers-core/issues"
+  },
+  "homepage": "https://github.com/ajoslin103/fabric-layers-core#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.24.5",
+    "@babel/core": "^7.24.5",
+    "@babel/plugin-proposal-class-properties": "^7.18.6",
+    "@babel/plugin-transform-runtime": "^7.24.5",
+    "@babel/preset-env": "^7.28.0",
+    "@babel/runtime": "^7.24.5",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "babel-eslint": "^10.1.0",
+    "babel-jest": "^29.7.0",
+    "babel-loader": "^10.0.0",
+    "babel-plugin-istanbul": "^6.1.1",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
+    "babel-preset-env": "^1.7.0",
+    "chai": "^5.2.1",
+    "conventional-changelog-cli": "^2.2.2",
+    "core-js": "^3.35.1",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-react": "^7.34.1",
+    "jest": "^29.7.0",
+    "karma": "^6.4.4",
+    "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^3.2.0",
+    "karma-mocha": "^2.0.1",
+    "mocha": "^11.7.1",
+    "prettier": "^3.2.5",
+    "rimraf": "^5.0.5",
+    "rollup": "^4.13.2",
+    "standard-version": "^9.5.0",
+    "webpack": "^5.101.0",
+    "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "eventemitter2": "^6.4.9",
+    "fabric": "^6.7.1"
+  },
+  "nyc": {
+    "sourceMap": false,
+    "instrument": false
   }
 }
