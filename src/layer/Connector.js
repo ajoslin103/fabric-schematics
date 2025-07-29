@@ -91,6 +91,4 @@ export class Connector extends Layer {
   }
 }
 
-export const connector = (start, end, options) => new Connector(start, end, options);
-
 export default Connector;

@@ -68,10 +68,4 @@ export class FabricLayersPoint extends Point {
   }
 }
 
-/**
- * Factory function to create a new Point
- * @param {number|{x: number, y: number}|Array<number>} x - X coordinate or point object/array
- * @param {number} [y] - Y coordinate if first parameter is a number
- * @returns {Point} A new Point instance
- */
-export const point = (x, y) => new FabricLayersPoint(x, y);
+export default FabricLayersPoint;

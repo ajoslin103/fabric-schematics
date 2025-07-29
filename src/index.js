@@ -37,11 +37,13 @@ export * from './paint/index';
 // Import what we need for the browser
 import { Map } from './map/Map';
 import { OriginPin } from './core/Constants';
+import { Marker } from './layer/marker/Marker';
 
 // Collect all exports
 const allExports = {
   version,
   Map,
+  Marker,
   OriginPin
 };
 

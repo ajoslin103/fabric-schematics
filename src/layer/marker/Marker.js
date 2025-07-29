@@ -275,4 +275,4 @@ export class Marker extends Layer {
   }
 }
 
-export const marker = (position, options) => new Marker(position, options);
+export default Marker;

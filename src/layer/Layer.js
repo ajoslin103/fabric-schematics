@@ -56,6 +56,4 @@ export class Layer extends Base {
   }
 }
 
-export const layer = options => new Layer(options);
-
 export default Layer;

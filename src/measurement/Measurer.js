@@ -148,4 +148,5 @@ class Measurer {
     this.draw();
   }
 }
+
 export default Measurer;

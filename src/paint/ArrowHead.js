@@ -32,4 +32,5 @@ class ArrowHead extends Triangle {
     });
   }
 }
+
 export default ArrowHead;

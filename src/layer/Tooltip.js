@@ -42,4 +42,5 @@ class Tooltip extends Layer {
     });
   }
 }
+
 export default Tooltip;

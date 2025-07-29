@@ -15,6 +15,4 @@ export class FabricLayersGroup extends Group {
   }
 }
 
-export const group = (objects, options) => new FabricLayersGroup(objects, options);
-
 export default FabricLayersGroup;

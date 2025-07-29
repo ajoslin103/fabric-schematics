@@ -86,6 +86,4 @@ export class Arrow extends Group {
   }
 }
 
-export const arrow = (points, options) => new Arrow(points, options);
-
 export default Arrow;

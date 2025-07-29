@@ -46,5 +46,5 @@ export class MarkerGroup extends Layer {
     }
   }
 }
-export const markerGroup = (bounds, options) => new MarkerGroup(bounds, options);
+
 export default MarkerGroup;

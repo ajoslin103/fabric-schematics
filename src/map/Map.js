@@ -535,4 +535,4 @@ export class Map extends mix(Base).with(ModesMixin) {
   }
 }
 
-export const map = (container, options) => new Map(container, options);
+export default Map;
