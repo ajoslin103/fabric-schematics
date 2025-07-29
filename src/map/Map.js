@@ -140,6 +140,12 @@ export class Map extends mix(Base).with(ModesMixin) {
     const clone = document.createElement('canvas');
     clone.width = canvas.width;
     clone.height = canvas.height;
+    
+    // Add absolute positioning to ensure proper overlay
+    clone.style.position = 'absolute';
+    clone.style.top = '0';
+    clone.style.left = '0';
+    
     canvas.wrapperEl.appendChild(clone);
     return clone;
   }
