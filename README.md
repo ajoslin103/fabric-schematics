@@ -4,6 +4,31 @@ An interactive coordinate-plane, grid, and layer management library for [fabric.
 
 `fabric-layers-core` is based on the excellent original work of [IndoorJS](https://github.com/mudin/indoorjs) by 
 
+## Publishing
+
+To publish a new version, run:
+
+```bash
+yarn test
+```
+
+```bash
+yarn build
+```
+
+if no errors, run:
+
+```bash
+yarn release
+```
+
+```bash
+yarn publish
+```
+
+You will be prompted to enter a One-Time-Password (OTP) from your GitHub account.
+
+
 ## 🚀 Running the Grid Demo
 
 To explore the grid functionality, follow these steps:
