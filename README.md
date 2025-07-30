@@ -2,32 +2,36 @@
 
 An interactive coordinate-plane, grid, and layer management library for [fabric.js](https://fabricjs.com/) canvases.
 
-`fabric-layers-core` is based on the excellent original work of [IndoorJS](https://github.com/mudin/indoorjs) by 
+`fabric-layers-core` is based on the excellent original work of [IndoorJS](https://github.com/mudin/indoorjs) by [Mudin](https://github.com/mudin).
 
-## Publishing
+---
 
-To publish a new version, run:
+## ✨ Classes -- with [more docs here](./docs/README.md)
 
-```bash
-yarn test
 ```
-
-```bash
-yarn build
+Base (EventEmitter2)
+├── Map (+ ModesMixin)
+│   ├── Grid
+│   ├── Point
+│   └── Measurement
+├── Layer
+│   ├── Vector Layers (Line, Circle, Rect, Polyline)
+│   ├── Marker System
+│   │   ├── Marker
+│   │   ├── MarkerGroup
+│   │   └── Icon
+│   ├── Group
+│   ├── Connector
+│   └── Tooltip
+├── Paint System
+│   ├── Canvas
+│   ├── Arrow
+│   ├── ArrowHead
+│   └── PaintManager
+└── Measurement System
+    ├── Measurement
+    └── Measurer
 ```
-
-if no errors, run:
-
-```bash
-yarn release
-```
-
-```bash
-git push --follow-tags origin main && npm publish
-```
-
-You will be prompted to enter a One-Time-Password (OTP) from your GitHub account.
-
 
 ## 🚀 Running the Grid Demo
 
@@ -57,34 +61,30 @@ To explore the grid functionality, follow these steps:
    - Refresh the browser to see changes
 
 
----
+## Publishing
 
-## ✨ Classes
+To publish a new version, run:
 
+```bash
+yarn test
 ```
-Base (EventEmitter2)
-├── Map (+ ModesMixin)
-│   ├── Grid
-│   ├── Point
-│   └── Measurement
-├── Layer
-│   ├── Vector Layers (Line, Circle, Rect, Polyline)
-│   ├── Marker System
-│   │   ├── Marker
-│   │   ├── MarkerGroup
-│   │   └── Icon
-│   ├── Group
-│   ├── Connector
-│   └── Tooltip
-├── Paint System
-│   ├── Canvas
-│   ├── Arrow
-│   ├── ArrowHead
-│   └── PaintManager
-└── Measurement System
-    ├── Measurement
-    └── Measurer
+
+```bash
+yarn build
 ```
+
+if no errors, run:
+
+```bash
+yarn release
+```
+
+```bash
+git push --follow-tags origin main && npm publish
+```
+
+You will be prompted to enter a One-Time-Password (OTP) from your GitHub account.
+
 
 ## 🤝 Contributing
 
