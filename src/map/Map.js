@@ -6,7 +6,6 @@ import { MAP, Modes } from '../core/Constants';
 import Grid from '../grid/Grid';
 import { FabricLayersPoint } from '../geometry/Point';
 import ModesMixin from './ModesMixin';
-import Measurement from '../measurement/Measurement';
 import { mix } from '../lib/mix';
 
 export class Map extends mix(Base).with(ModesMixin) {
@@ -75,41 +74,21 @@ export class Map extends mix(Base).with(ModesMixin) {
     setTimeout(() => {
       this.emit('ready', this);
     }, 300);
-
-    this.measurement = new Measurement(this);
   }
 
   addLayer(layer) {
-    // this.canvas.renderOnAddRemove = false;
+    // Simplified layer adding
     if (!layer.shape) {
       console.error('shape is undefined');
       return;
     }
     this.canvas.add(layer.shape);
     this.canvas._objects.sort((o1, o2) => o1.zIndex - o2.zIndex);
-
-    if (layer.shape.keepOnZoom) {
-      const scale = 1.0 / this.zoom;
-      layer.shape.set('scaleX', scale);
-      layer.shape.set('scaleY', scale);
-      layer.shape.setCoords();
-      this.emit(`${layer.class}scaling`, layer);
-    }
-    if (layer.class) {
-      this.emit(`${layer.class}:added`, layer);
-    }
-
-    // this.canvas.renderOnAddRemove = true;
-
-    // this.update();
     this.canvas.requestRenderAll();
   }
 
   removeLayer(layer) {
     if (!layer || !layer.shape) return;
-    if (layer.class) {
-      this.emit(`${layer.class}:removed`, layer);
-    }
     this.canvas.remove(layer.shape);
   }
 
@@ -518,26 +497,13 @@ export class Map extends mix(Base).with(ModesMixin) {
   }
 
   getMarkerById(id) {
-    const objects = this.canvas.getObjects();
-    for (let i = 0; i < objects.length; i += 1) {
-      const obj = objects[i];
-      if (obj.class === 'marker' && obj.id === id) {
-        return obj.parent;
-      }
-    }
+    // Simplified stub - grid demo doesn't use markers
     return null;
   }
 
   getMarkers() {
-    const list = [];
-    const objects = this.canvas.getObjects();
-    for (let i = 0; i < objects.length; i += 1) {
-      const obj = objects[i];
-      if (obj.class === 'marker') {
-        list.push(obj.parent);
-      }
-    }
-    return list;
+    // Simplified stub - grid demo doesn't use markers
+    return [];
   }
 }
 

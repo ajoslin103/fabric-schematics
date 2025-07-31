@@ -1,7 +1,12 @@
 // Marker class test file for Karma browser-based testing
+// Skipped since Marker class was removed in grid-demo simplification
 
 describe('Marker Class Tests', function() {
-  it('Marker class should be exported', function() {
+  before(function() {
+    // Skip all tests in this suite since Marker was removed for grid-demo simplification
+    this.skip();
+  });
+  it('Marker class should be exported (skipped)', function() {
     // Debug: Log what's available in FabricLayers
     console.log('FabricLayers available:', !!window.FabricLayers);
     console.log('FabricLayers keys:', Object.keys(window.FabricLayers || {}));
@@ -13,7 +18,7 @@ describe('Marker Class Tests', function() {
     expect(typeof window.FabricLayers.Marker).to.equal('function');
   });
   
-  it('Marker class should have the right prototype chain', function() {
+  it('Marker class should have the right prototype chain (skipped)', function() {
     if (!window.FabricLayers || !window.FabricLayers.Marker) {
       this.skip();
       return;

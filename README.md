@@ -1,37 +1,21 @@
-# Fabric Layers Core
+# Fabric Layers Core (Grid-focused)
 
-An interactive coordinate-plane, grid, and layer management library for [fabric.js](https://fabricjs.com/) canvases.
+An interactive coordinate-plane and grid library for [fabric.js](https://fabricjs.com/) canvases. This is a simplified version focused solely on grid functionality.
 
 `fabric-layers-core` is based on the excellent original work of [IndoorJS](https://github.com/mudin/indoorjs) by [Mudin](https://github.com/mudin).
 
 ---
 
-## ✨ Classes -- with [more docs here](./docs/README.md)
+## ✨ Classes
 
 ```
 Base (EventEmitter2)
 ├── Map (+ ModesMixin)
 │   ├── Grid
-│   ├── Point
-│   └── Measurement
-├── Layer
-│   ├── Vector Layers (Line, Circle, Rect, Polyline)
-│   ├── Marker System
-│   │   ├── Marker
-│   │   ├── MarkerGroup
-│   │   └── Icon
-│   ├── Group
-│   ├── Connector
-│   └── Tooltip
-├── Paint System
-│   ├── Canvas
-│   ├── Arrow
-│   ├── ArrowHead
-│   └── PaintManager
-└── Measurement System
-    ├── Measurement
-    └── Measurer
+│   └── Point
 ```
+
+This version has been simplified to focus only on the grid functionality, removing layer management, marker system, measurement, and paint systems.
 
 ## 🚀 Running the Grid Demo
 
