@@ -76,21 +76,7 @@ export class Map extends mix(Base).with(ModesMixin) {
     }, 300);
   }
 
-  addLayer(layer) {
-    // Simplified layer adding
-    if (!layer.shape) {
-      console.error('shape is undefined');
-      return;
-    }
-    this.canvas.add(layer.shape);
-    this.canvas._objects.sort((o1, o2) => o1.zIndex - o2.zIndex);
-    this.canvas.requestRenderAll();
-  }
-
-  removeLayer(layer) {
-    if (!layer || !layer.shape) return;
-    this.canvas.remove(layer.shape);
-  }
+  // Layer functionality removed (not used in grid demo)
 
   addGrid() {
     this.gridCanvas = this.cloneCanvas();
@@ -105,14 +91,7 @@ export class Map extends mix(Base).with(ModesMixin) {
     this.grid.draw();
   }
 
-  moveTo(obj, index) {
-    if (index !== undefined) {
-      obj.zIndex = index;
-    }
-    if (!this.grid || !this.grid.isPinned) {
-      this.canvas.moveTo(obj.shape, obj.zIndex);
-    }
-  }
+  // moveTo functionality removed (not used in grid demo)
 
   cloneCanvas(canvas) {
     canvas = canvas || this.canvas;
@@ -385,110 +364,10 @@ export class Map extends mix(Base).with(ModesMixin) {
   registerListeners() {
     const vm = this;
 
-    this.canvas.on('object:scaling', e => {
-      if (e.target.class) {
-        vm.emit(`${e.target.class}:scaling`, e.target.parent);
-        e.target.parent.emit('scaling', e.target.parent);
-        return;
-      }
-      const group = e.target;
-      if (!group.getObjects) return;
-
-      const objects = group.getObjects();
-      group.removeWithUpdate();
-      for (let i = 0; i < objects.length; i += 1) {
-        const object = objects[i];
-        object.orgYaw = object.parent.yaw || 0;
-        object.fire('moving', object.parent);
-        vm.emit(`${object.class}:moving`, object.parent);
-      }
-      vm.update();
-      vm.canvas.requestRenderAll();
-    });
-
-    this.canvas.on('object:rotating', e => {
-      if (e.target.class) {
-        vm.emit(`${e.target.class}:rotating`, e.target.parent, e.target.angle);
-        e.target.parent.emit('rotating', e.target.parent, e.target.angle);
-        return;
-      }
-      const group = e.target;
-      if (!group.getObjects) return;
-      const objects = group.getObjects();
-      for (let i = 0; i < objects.length; i += 1) {
-        const object = objects[i];
-        if (object.class === 'marker') {
-          object._set('angle', -group.angle);
-          object.parent.yaw = -group.angle + (object.orgYaw || 0);
-          // object.orgYaw = object.parent.yaw;
-          object.fire('moving', object.parent);
-          vm.emit(`${object.class}:moving`, object.parent);
-          object.fire('rotating', object.parent);
-          vm.emit(`${object.class}:rotating`, object.parent);
-        }
-      }
-      this.update();
-    });
-
-    this.canvas.on('object:moving', e => {
-      if (e.target.class) {
-        vm.emit(`${e.target.class}:moving`, e.target.parent);
-        e.target.parent.emit('moving', e.target.parent);
-        return;
-      }
-      const group = e.target;
-      if (!group.getObjects) return;
-      const objects = group.getObjects();
-      for (let i = 0; i < objects.length; i += 1) {
-        const object = objects[i];
-        if (object.class) {
-          object.fire('moving', object.parent);
-          vm.emit(`${object.class}:moving`, object.parent);
-        }
-      }
-      this.update();
-    });
-
-    this.canvas.on('object:moved', e => {
-      if (e.target.class) {
-        vm.emit(`${e.target.class}dragend`, e);
-        vm.emit(`${e.target.class}:moved`, e.target.parent);
-        e.target.parent.emit('moved', e.target.parent);
-        this.update();
-        return;
-      }
-      const group = e.target;
-      if (!group.getObjects) return;
-      const objects = group.getObjects();
-      for (let i = 0; i < objects.length; i += 1) {
-        const object = objects[i];
-        if (object.class) {
-          object.fire('moved', object.parent);
-          vm.emit(`${object.class}:moved`, object.parent);
-        }
-      }
-      this.update();
-    });
-
+    // Only keep the window resize handler - removed all layer-related event handlers
     window.addEventListener('resize', () => {
       vm.onResize();
     });
-
-    // document.addEventListener('keyup', () => {
-    //   if (this.modeToggleByKey && this.isGrabMode()) {
-    //     this.setModeAsSelect();
-    //     this.modeToggleByKey = false;
-    //   }
-    // });
-
-    // document.addEventListener('keydown', event => {
-    //   if (event.ctrlKey || event.metaKey) {
-    //     if (this.isSelectMode()) {
-    //       this.setModeAsGrab();
-    //     }
-    //     this.modeToggleByKey = true;
-    //   }
-    // });
   }
 
   unregisterListeners() {
@@ -496,15 +375,7 @@ export class Map extends mix(Base).with(ModesMixin) {
     this.canvas.off('object:moved');
   }
 
-  getMarkerById(id) {
-    // Simplified stub - grid demo doesn't use markers
-    return null;
-  }
-
-  getMarkers() {
-    // Simplified stub - grid demo doesn't use markers
-    return [];
-  }
+  // Marker functionality removed (not used in grid demo)
 }
 
 export default Map;

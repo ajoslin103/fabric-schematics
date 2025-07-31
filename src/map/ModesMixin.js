@@ -24,30 +24,14 @@ const ModesMixin = superclass =>
           this.canvas.hoverCursor = 'move';
           this.canvas.moveCursor = 'move';
           break;
-        case Modes.MEASURE:
-          this.canvas.isDrawingMode = true;
-          this.canvas.freeDrawingBrush.color = 'transparent';
-          this.canvas.discardActiveObject();
-          break;
-        case Modes.DRAW:
-          this.canvas.isDrawingMode = true;
-          break;
 
         default:
           break;
       }
     }
 
-    setModeAsDraw() {
-      this.setMode(Modes.DRAW);
-    }
-
     setModeAsSelect() {
       this.setMode(Modes.SELECT);
-    }
-
-    setModeAsMeasure() {
-      this.setMode(Modes.MEASURE);
     }
 
     setModeAsGrab() {
@@ -60,14 +44,6 @@ const ModesMixin = superclass =>
 
     isGrabMode() {
       return this.mode === Modes.GRAB;
-    }
-
-    isMeasureMode() {
-      return this.mode === Modes.MEASURE;
-    }
-
-    isDrawMode() {
-      return this.mode === Modes.DRAW;
     }
   };
 

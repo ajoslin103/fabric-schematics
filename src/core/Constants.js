@@ -3,9 +3,7 @@ import { FabricObject, Group } from 'fabric';
 
 export const Modes = {
   SELECT: 'SELECT',
-  GRAB: 'GRAB',
-  MEASURE: 'MEASURE',
-  DRAW: 'DRAW'
+  GRAB: 'GRAB'
 };
 
 export const OriginPin = {
@@ -30,11 +28,7 @@ export const MAP = {
   enablePan: true
 };
 
-export const MARKER = {
-  position: new FabricLayersPoint(),
-  minZoom: 1,
-  maxZoom: 20
-};
+// Marker functionality removed (not used in grid demo)
 
 export const ICON = {
   url:
