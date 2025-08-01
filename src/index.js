@@ -1,5 +1,5 @@
 /**
- * fabric-layers - A fabric.js coordinate-plane (grid) library
+ * fabric-schematics - A schematic and diagram visualization library for fabric.js
  * Main entry point that re-exports core grid functionality
  */
 
@@ -10,7 +10,7 @@ export { version };
 
 // Log version info if in browser environment
 if (typeof window !== 'undefined') {
-  console.log('fabric-layers-core ', version);
+  console.log('fabric-schematics ', version);
 }
 
 // Core components
@@ -39,14 +39,14 @@ const allExports = {
 // If we're in a browser environment, add to global scope
 // But provide a noConflict method
 if (typeof window !== 'undefined') {
-  const oldFabricLayers = window.FabricLayers;
+  const oldFabricSchematics = window.FabricSchematics;
   
   // Create namespace
-  window.FabricLayers = allExports;
+  window.FabricSchematics = allExports;
   
   // Provide noConflict method
-  window.FabricLayers.noConflict = function() {
-    window.FabricLayers = oldFabricLayers;
+  window.FabricSchematics.noConflict = function() {
+    window.FabricSchematics = oldFabricSchematics;
     return this;
   };
 }

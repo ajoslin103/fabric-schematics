@@ -30,7 +30,7 @@ export class Map extends mix(Base).with(ModesMixin) {
 
     const canvas = document.createElement('canvas');
     this.container.appendChild(canvas);
-    canvas.setAttribute('id', 'fabric-layers-canvas');
+    canvas.setAttribute('id', 'fabric-schematics-canvas');
 
     canvas.width = this.width || this.container.clientWidth;
     canvas.height = this.height || this.container.clientHeight;
@@ -80,7 +80,7 @@ export class Map extends mix(Base).with(ModesMixin) {
 
   addGrid() {
     this.gridCanvas = this.cloneCanvas();
-    this.gridCanvas.setAttribute('id', 'fabric-layers-grid-canvas');
+    this.gridCanvas.setAttribute('id', 'fabric-schematics-grid-canvas');
     this.grid = new Grid(this.gridCanvas, this);
     
     // Set grid properties from map settings
