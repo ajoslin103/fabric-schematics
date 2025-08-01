@@ -1,4 +1,4 @@
-// Rollup configuration for fabric-layers library (ESM, Node 22+ compatible)
+// Rollup configuration for fabric-schematics library (ESM, Node 22+ compatible)
 import { babel } from '@rollup/plugin-babel';
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
@@ -7,7 +7,7 @@ import terser from '@rollup/plugin-terser';
 import fs from 'node:fs';
 const pkg = JSON.parse(fs.readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 
-const banner = `/* @preserve\n * fabric-layers ${pkg.version}, a fabric.js coordinate-plane (grid) & layers library. ${pkg.homepage}\n * (c) ${new Date().getFullYear()} ${pkg.author || 'fabric-layers contributors'}\n * License: ${pkg.license}\n */\n`;
+const banner = `/* @preserve\n * fabric-schematics ${pkg.version}, a fabric.js coordinate-plane (grid) & layers library. ${pkg.homepage}\n * (c) ${new Date().getFullYear()} ${pkg.author || 'fabric-schematics contributors'}\n * License: ${pkg.license}\n */\n`;
 
 const outputConfig = (format) => ({
   sourcemap: true,
@@ -45,7 +45,7 @@ export default [
       {
         file: pkg.unpkg.replace('.js', '.min.js'),
         format: 'umd',
-        name: 'FabricLayers',
+        name: 'FabricSchematics',
         ...outputConfig('umd'),
         sourcemap: false,
         plugins: [terser()]
@@ -53,7 +53,7 @@ export default [
       {
         file: pkg.unpkg,
         format: 'umd',
-        name: 'FabricLayers',
+        name: 'FabricSchematics',
         ...outputConfig('umd')
       }
     ],

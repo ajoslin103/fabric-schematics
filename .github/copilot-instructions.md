@@ -1,6 +1,4 @@
-# Fabric Layers
-
-## this project is a monorepo 
+# Fabric Schematics
 
 ### WE ARE USING YARN v1 AS THE PACKAGE MANAGER
 
@@ -12,15 +10,8 @@ There is a packages folder with two packages that we will build and publish to n
 
 NOTE: We are building against fabric@5.5.2-browser to avoid issues with canvas in the browser (note the -browser suffix)
 
-- fabric-layers-core
+- fabric-schematics
 
-fabric-layers-core is a fabric.js coordinate-plane (grid) & layers library
+fabric-schematics is a fabric.js coordinate-plane (grid) & layers library
 
-the fabric-layers-core/grid-demo.html file is a demo of the library, do not use native fabric.js routines where a class from this repo is available
-
-- fabric-layers-react   
-
-fabric-layers-react is a React wrapper around the fabric-layers fabric-layers package
-
-the fabric-layers-react/plane-demo.html file is a simple demo of how to use the fabric-layers library -- do not use native fabric.js methods in this file, only use fabric-layer-react components
-
+the fabric-schematics/grid-demo.html file is a demo of the library, do not use native fabric.js routines where a class from this repo is available

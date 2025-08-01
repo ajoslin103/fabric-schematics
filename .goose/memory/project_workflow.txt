@@ -1,15 +1,12 @@
-# react development workflow components
-React Development Workflow:
-- Location: packages/fabric-layers-react/example
-- Purpose: Building and testing React components for fabric-layers
+#  development workflow components
+ Development Workflow:
+- Location: packages/fabric-schematics
+- Purpose: Building and testing  components for fabric-schematics
 - Key Points:
-  1. ONLY use components from packages/fabric-layers-react/src/components
-  2. Using fabric-layers-core as dependency
-  3. This is an iterative development process to refine components
-  4. End goal: Publish as fabric-layers-react package
+  1. ONLY use FabricJS classes to build fabric-schematics classes
+  2. This is an iterative development process to refine components
+  3. End goal: Publish as fabric-schematics package
 - Development Rules:
-  1. No direct fabric.js usage - everything through components
-  2. All new features should be added as components
-  3. Example folder serves as testing ground
-  4. Components must be thoroughly tested before publishing
+  1. All new features should be added as custom FabricJS classes
+  2. Components must be thoroughly tested before publishing
 

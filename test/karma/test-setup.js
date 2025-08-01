@@ -9,8 +9,8 @@ console.log('Fabric version: ' + (window.fabric ? window.fabric.version : 'unkno
 console.log('Fabric has Canvas: ' + !!window.fabric?.Canvas);
 console.log('Fabric has Point: ' + !!window.fabric?.Point);
 
-// Check for fabric-layers-core global
-console.log('FabricLayers available: ' + !!window.FabricLayers);
+// Check for fabric-schematics global
+console.log('FabricSchematics available: ' + !!window.FabricSchematics);
 
 // Set up test fixture container
 const fixture = document.createElement('div');
