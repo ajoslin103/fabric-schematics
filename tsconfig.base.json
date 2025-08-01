@@ -14,8 +14,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "fabric-layers-core": ["packages/fabric-layers-core/src/index.ts"],
-      "fabric-layers-react": ["packages/fabric-layers-react/src/index.ts"]
+      "https://github.com/ajoslin103/fabric-schematics": ["packages/https://github.com/ajoslin103/fabric-schematics/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

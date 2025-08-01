@@ -1,37 +1,21 @@
-# Fabric Layers Core
+# Fabric Schematics
 
-An interactive coordinate-plane, grid, and layer management library for [fabric.js](https://fabricjs.com/) canvases.
+A schematic and diagram visualization library for [fabric.js](https://fabricjs.com/) canvases, with advanced grid system for precise coordinate-based drawing.
 
-`fabric-layers-core` is based on the excellent original work of [IndoorJS](https://github.com/mudin/indoorjs) by [Mudin](https://github.com/mudin).
+`fabric-schematics` evolved from `fabric-layers-core` which was based on the excellent original work of [IndoorJS](https://github.com/mudin/indoorjs) by [Mudin](https://github.com/mudin).
 
 ---
 
-## ✨ Classes -- with [more docs here](./docs/README.md)
+## ✨ Classes
 
 ```
 Base (EventEmitter2)
 ├── Map (+ ModesMixin)
 │   ├── Grid
-│   ├── Point
-│   └── Measurement
-├── Layer
-│   ├── Vector Layers (Line, Circle, Rect, Polyline)
-│   ├── Marker System
-│   │   ├── Marker
-│   │   ├── MarkerGroup
-│   │   └── Icon
-│   ├── Group
-│   ├── Connector
-│   └── Tooltip
-├── Paint System
-│   ├── Canvas
-│   ├── Arrow
-│   ├── ArrowHead
-│   └── PaintManager
-└── Measurement System
-    ├── Measurement
-    └── Measurer
+│   └── Point
 ```
+
+This library focuses on providing schematic and diagram components, starting with an advanced coordinate grid system. Future versions will include connectors, markers, and measurement tools.
 
 ## 🚀 Running the Grid Demo
 
@@ -39,12 +23,12 @@ To explore the grid functionality, follow these steps:
 
 1. **Install Dependencies**
    ```bash
-   yarn install
+   nvm i && yarn install
    ```
 
 2. **Build the Library**
    ```bash
-   yarn build
+   nvm i && yarn build
    ```
 
 3. **Open the Demo**
@@ -56,7 +40,7 @@ To explore the grid functionality, follow these steps:
      - Reset view button
 
 4. **Development Workflow**
-   - cd ../fabric-layers-core && npm run build:watch
+   - `nvm i && yarn build:watch`
    - Make changes to the source code
    - Refresh the browser to see changes
 
@@ -100,6 +84,6 @@ Please follow the [Conventional Commits](https://www.conventionalcommits.org/) s
 
 ## 📄 Licenses
 
-MIT © 2025 [Allen Joslin](https://github.com/ajoslin103) (current author of fabric-layers-core)
+MIT © 2025 [Allen Joslin](https://github.com/ajoslin103) (author of fabric-schematics)
 
 MIT © 2022 [Mudin](https://github.com/mudin) (original author of IndoorJS)

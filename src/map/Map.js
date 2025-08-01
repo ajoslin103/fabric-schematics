@@ -6,7 +6,6 @@ import { MAP, Modes } from '../core/Constants';
 import Grid from '../grid/Grid';
 import { FabricLayersPoint } from '../geometry/Point';
 import ModesMixin from './ModesMixin';
-import Measurement from '../measurement/Measurement';
 import { mix } from '../lib/mix';
 
 export class Map extends mix(Base).with(ModesMixin) {
@@ -31,7 +30,7 @@ export class Map extends mix(Base).with(ModesMixin) {
 
     const canvas = document.createElement('canvas');
     this.container.appendChild(canvas);
-    canvas.setAttribute('id', 'fabric-layers-canvas');
+    canvas.setAttribute('id', 'fabric-schematics-canvas');
 
     canvas.width = this.width || this.container.clientWidth;
     canvas.height = this.height || this.container.clientHeight;
@@ -75,47 +74,13 @@ export class Map extends mix(Base).with(ModesMixin) {
     setTimeout(() => {
       this.emit('ready', this);
     }, 300);
-
-    this.measurement = new Measurement(this);
   }
 
-  addLayer(layer) {
-    // this.canvas.renderOnAddRemove = false;
-    if (!layer.shape) {
-      console.error('shape is undefined');
-      return;
-    }
-    this.canvas.add(layer.shape);
-    this.canvas._objects.sort((o1, o2) => o1.zIndex - o2.zIndex);
-
-    if (layer.shape.keepOnZoom) {
-      const scale = 1.0 / this.zoom;
-      layer.shape.set('scaleX', scale);
-      layer.shape.set('scaleY', scale);
-      layer.shape.setCoords();
-      this.emit(`${layer.class}scaling`, layer);
-    }
-    if (layer.class) {
-      this.emit(`${layer.class}:added`, layer);
-    }
-
-    // this.canvas.renderOnAddRemove = true;
-
-    // this.update();
-    this.canvas.requestRenderAll();
-  }
-
-  removeLayer(layer) {
-    if (!layer || !layer.shape) return;
-    if (layer.class) {
-      this.emit(`${layer.class}:removed`, layer);
-    }
-    this.canvas.remove(layer.shape);
-  }
+  // Layer functionality removed (not used in grid demo)
 
   addGrid() {
     this.gridCanvas = this.cloneCanvas();
-    this.gridCanvas.setAttribute('id', 'fabric-layers-grid-canvas');
+    this.gridCanvas.setAttribute('id', 'fabric-schematics-grid-canvas');
     this.grid = new Grid(this.gridCanvas, this);
     
     // Set grid properties from map settings
@@ -126,14 +91,7 @@ export class Map extends mix(Base).with(ModesMixin) {
     this.grid.draw();
   }
 
-  moveTo(obj, index) {
-    if (index !== undefined) {
-      obj.zIndex = index;
-    }
-    if (!this.grid || !this.grid.isPinned) {
-      this.canvas.moveTo(obj.shape, obj.zIndex);
-    }
-  }
+  // moveTo functionality removed (not used in grid demo)
 
   cloneCanvas(canvas) {
     canvas = canvas || this.canvas;
@@ -406,110 +364,10 @@ export class Map extends mix(Base).with(ModesMixin) {
   registerListeners() {
     const vm = this;
 
-    this.canvas.on('object:scaling', e => {
-      if (e.target.class) {
-        vm.emit(`${e.target.class}:scaling`, e.target.parent);
-        e.target.parent.emit('scaling', e.target.parent);
-        return;
-      }
-      const group = e.target;
-      if (!group.getObjects) return;
-
-      const objects = group.getObjects();
-      group.removeWithUpdate();
-      for (let i = 0; i < objects.length; i += 1) {
-        const object = objects[i];
-        object.orgYaw = object.parent.yaw || 0;
-        object.fire('moving', object.parent);
-        vm.emit(`${object.class}:moving`, object.parent);
-      }
-      vm.update();
-      vm.canvas.requestRenderAll();
-    });
-
-    this.canvas.on('object:rotating', e => {
-      if (e.target.class) {
-        vm.emit(`${e.target.class}:rotating`, e.target.parent, e.target.angle);
-        e.target.parent.emit('rotating', e.target.parent, e.target.angle);
-        return;
-      }
-      const group = e.target;
-      if (!group.getObjects) return;
-      const objects = group.getObjects();
-      for (let i = 0; i < objects.length; i += 1) {
-        const object = objects[i];
-        if (object.class === 'marker') {
-          object._set('angle', -group.angle);
-          object.parent.yaw = -group.angle + (object.orgYaw || 0);
-          // object.orgYaw = object.parent.yaw;
-          object.fire('moving', object.parent);
-          vm.emit(`${object.class}:moving`, object.parent);
-          object.fire('rotating', object.parent);
-          vm.emit(`${object.class}:rotating`, object.parent);
-        }
-      }
-      this.update();
-    });
-
-    this.canvas.on('object:moving', e => {
-      if (e.target.class) {
-        vm.emit(`${e.target.class}:moving`, e.target.parent);
-        e.target.parent.emit('moving', e.target.parent);
-        return;
-      }
-      const group = e.target;
-      if (!group.getObjects) return;
-      const objects = group.getObjects();
-      for (let i = 0; i < objects.length; i += 1) {
-        const object = objects[i];
-        if (object.class) {
-          object.fire('moving', object.parent);
-          vm.emit(`${object.class}:moving`, object.parent);
-        }
-      }
-      this.update();
-    });
-
-    this.canvas.on('object:moved', e => {
-      if (e.target.class) {
-        vm.emit(`${e.target.class}dragend`, e);
-        vm.emit(`${e.target.class}:moved`, e.target.parent);
-        e.target.parent.emit('moved', e.target.parent);
-        this.update();
-        return;
-      }
-      const group = e.target;
-      if (!group.getObjects) return;
-      const objects = group.getObjects();
-      for (let i = 0; i < objects.length; i += 1) {
-        const object = objects[i];
-        if (object.class) {
-          object.fire('moved', object.parent);
-          vm.emit(`${object.class}:moved`, object.parent);
-        }
-      }
-      this.update();
-    });
-
+    // Only keep the window resize handler - removed all layer-related event handlers
     window.addEventListener('resize', () => {
       vm.onResize();
     });
-
-    // document.addEventListener('keyup', () => {
-    //   if (this.modeToggleByKey && this.isGrabMode()) {
-    //     this.setModeAsSelect();
-    //     this.modeToggleByKey = false;
-    //   }
-    // });
-
-    // document.addEventListener('keydown', event => {
-    //   if (event.ctrlKey || event.metaKey) {
-    //     if (this.isSelectMode()) {
-    //       this.setModeAsGrab();
-    //     }
-    //     this.modeToggleByKey = true;
-    //   }
-    // });
   }
 
   unregisterListeners() {
@@ -517,28 +375,7 @@ export class Map extends mix(Base).with(ModesMixin) {
     this.canvas.off('object:moved');
   }
 
-  getMarkerById(id) {
-    const objects = this.canvas.getObjects();
-    for (let i = 0; i < objects.length; i += 1) {
-      const obj = objects[i];
-      if (obj.class === 'marker' && obj.id === id) {
-        return obj.parent;
-      }
-    }
-    return null;
-  }
-
-  getMarkers() {
-    const list = [];
-    const objects = this.canvas.getObjects();
-    for (let i = 0; i < objects.length; i += 1) {
-      const obj = objects[i];
-      if (obj.class === 'marker') {
-        list.push(obj.parent);
-      }
-    }
-    return list;
-  }
+  // Marker functionality removed (not used in grid demo)
 }
 
 export default Map;
