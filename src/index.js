@@ -1,6 +1,6 @@
 /**
- * fabric-layers - A fabric.js coordinate-plane (grid) & layers library
- * Main entry point that re-exports all functionality
+ * fabric-schematics - A schematic and diagram visualization library for fabric.js
+ * Main entry point that re-exports core grid functionality
  */
 
 import { version } from '../package.json';
@@ -10,7 +10,7 @@ export { version };
 
 // Log version info if in browser environment
 if (typeof window !== 'undefined') {
-  console.log('fabric-layers-core ', version);
+  console.log('fabric-schematics ', version);
 }
 
 // Core components
@@ -22,42 +22,31 @@ export * from './geometry/index';
 // Map components
 export * from './map/index';
 
-// Layer system
-export * from './layer/index';
-
 // Grid system
 export * from './grid/index';
-
-// Measurement utilities
-export * from './measurement/index';
-
-// Paint tools
-export * from './paint/index';
 
 // Import what we need for the browser
 import { Map } from './map/Map';
 import { OriginPin } from './core/Constants';
-import { Marker } from './layer/marker/Marker';
 
 // Collect all exports
 const allExports = {
   version,
   Map,
-  Marker,
   OriginPin
 };
 
 // If we're in a browser environment, add to global scope
 // But provide a noConflict method
 if (typeof window !== 'undefined') {
-  const oldFabricLayers = window.FabricLayers;
+  const oldFabricSchematics = window.FabricSchematics;
   
   // Create namespace
-  window.FabricLayers = allExports;
+  window.FabricSchematics = allExports;
   
   // Provide noConflict method
-  window.FabricLayers.noConflict = function() {
-    window.FabricLayers = oldFabricLayers;
+  window.FabricSchematics.noConflict = function() {
+    window.FabricSchematics = oldFabricSchematics;
     return this;
   };
 }

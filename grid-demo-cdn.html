@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>fabric-layers Grid Demo</title>
+    <title>fabric-schematics Grid Demo</title>
     <style>
         body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
         #canvas-container { border: 1px solid #ccc; margin: 20px 0; width: 800px; height: 600px; background: #f8f9fa; }
@@ -13,7 +13,7 @@
     </style>
 </head>
 <body>
-    <h1>fabric-layers Grid Demo</h1>
+    <h1>fabric-schematics Grid Demo</h1>
     <div class="controls">
         <label style="margin-right:10px;">
           Min Zoom: <input id="minZoomInput" type="number" step="0.01" value="0.05" style="width:70px;">
@@ -48,8 +48,9 @@
     <!-- Load fabric -browser from CDN -->
     <script src="https://cdn.jsdelivr.net/npm/fabric@5.2.2-browser/dist/fabric.min.js"></script>
 
-    <!-- load fabric-layers-core from unpkg.com CDN -->
-    <script src="https://unpkg.com/fabric-layers-core@1.1.12/dist/index.umd.js"></script>
+    <!-- Note: fabric-schematics will be published to npm in the future -->
+    <!-- For now, use the local build or modify this to point to the right CDN path -->
+    <script src="dist/index.umd.js?v=20250731195900"></script>
 
     <script>
       // Wait for DOM
@@ -57,19 +58,19 @@
 
         console.log('fabric available?', !!window.fabric);
         console.log('EventEmitter2 available?', !!window.EventEmitter2);
-        console.log('FabricLayers object:', window.FabricLayers);
+        console.log('FabricSchematics object:', window.FabricSchematics);
         
-        if (window.FabricLayers) {
-          console.log('FabricLayers keys:', Object.keys(window.FabricLayers));
-          console.log('Map constructor available?', !!window.FabricLayers.Map);
-          console.log('map function available?', typeof window.FabricLayers.map === 'function');
+        if (window.FabricSchematics) {
+          console.log('FabricSchematics keys:', Object.keys(window.FabricSchematics));
+          console.log('Map constructor available?', !!window.FabricSchematics.Map);
+          console.log('map function available?', typeof window.FabricSchematics.map === 'function');
         }
 
         // Get container
         const container = document.getElementById('canvas-container');
 
         // Create the map with grid enabled
-        const map = new window.FabricLayers.Map(container, {
+        const map = new window.FabricSchematics.Map(container, {
           width: 800,
           height: 600,
           showGrid: true,
