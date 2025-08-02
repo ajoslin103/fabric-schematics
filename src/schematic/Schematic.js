@@ -1,11 +1,11 @@
 import { clamp } from '../lib/mumath/index';
-import Grid from '../grid/Grid';
 import { FabricLayersPoint } from '../geometry/Point';
 import { MAP, Modes } from '../core/Constants';
+import Grid from '../grid/Grid';
 
 /**
  * Schematic object implementation for fabric.js
- * Converted from the original Map.js class
+ * Acts as a view controller managing a Grid instance within Fabric.js lifecycle
  */
 fabric.Schematic = fabric.util.createClass(fabric.Object, {
   type: 'schematic',
@@ -26,19 +26,11 @@ fabric.Schematic = fabric.util.createClass(fabric.Object, {
     this.originPin = 'NONE';
     this.pinMargin = 10;
     this.zoomOverMouse = true;
-    this.center = new FabricLayersPoint(this.center);
+    this.center = new FabricLayersPoint(this.center || { x: 0, y: 0 });
     
     // Override with provided options
     Object.assign(this, options);
 
-    // Set initial position and dimensions
-    this.setCoords();
-    
-    // Setup grid
-    if (this.showGrid) {
-      this._setupGrid();
-    }
-    
     // Set initial mode
     this.mode = this.mode || Modes.GRAB;
     
@@ -49,61 +41,87 @@ fabric.Schematic = fabric.util.createClass(fabric.Object, {
     this.dx = 0;
     this.dy = 0;
     
-    // Create event handlers bound to this instance
-    this._onResize = this.onResize.bind(this);
+    // Initialize grid using existing Grid class
+    this._initializeGrid();
     
-    // Register event listeners
-    this.registerListeners();
+    // Set initial position and dimensions
+    this.setCoords();
   },
 
   /**
-   * Set up the grid for this schematic
+   * Initialize grid using the existing Grid class
    * @private
    */
-  _setupGrid: function() {
-    // Create an offscreen canvas for the grid
-    const canvas = document.createElement('canvas');
-    canvas.width = this.width || 500;
-    canvas.height = this.height || 500;
+  _initializeGrid: function() {
+    // Create a virtual canvas for the Grid class to use
+    // This canvas will not be added to DOM - Grid will render to Fabric.js context
+    this._virtualCanvas = document.createElement('canvas');
+    this._virtualCanvas.width = this.width || 500;
+    this._virtualCanvas.height = this.height || 500;
     
-    this.gridCanvas = canvas;
-    this.gridCanvas.setAttribute('id', 'fabric-schematics-grid-canvas');
-    this.grid = new Grid(this.gridCanvas, this);
+    // Create Grid instance with virtual canvas
+    this.grid = new Grid(this._virtualCanvas, this);
     
     // Set grid properties from schematic settings
     this.grid.setOriginPin(this.originPin);
     this.grid.setPinMargin(this.pinMargin);
     this.grid.setZoomOverMouse(this.zoomOverMouse);
-    
-    this.grid.draw();
   },
   
   /**
-   * Main rendering function for the schematic
+   * Update grid state for current view
+   * @private
+   */
+  _updateGrid: function() {
+    if (!this.grid) return;
+    
+    // Update virtual canvas size if needed
+    const width = this.width || 500;
+    const height = this.height || 500;
+    
+    if (this._virtualCanvas.width !== width || this._virtualCanvas.height !== height) {
+      this._virtualCanvas.width = width;
+      this._virtualCanvas.height = height;
+      this.grid.setSize(width, height);
+    }
+    
+    // Update grid with current center and zoom
+    this.grid.update2({
+      x: this.center.x,
+      y: this.center.y,
+      zoom: this.zoom
+    });
+  },
+  
+  /**
+   * Main rendering function using Grid class with Fabric.js context
    * @param {CanvasRenderingContext2D} ctx - The canvas context to render to
    * @private
    */
   _render: function(ctx) {
-    // Save current context state
+    if (!this.showGrid || !this.grid) return;
+    
+    // Update grid state
+    this._updateGrid();
+    
+    // Temporarily replace grid's context with Fabric.js context
+    const originalContext = this.grid.context;
+    this.grid.context = ctx;
+    
+    // Save context state
     ctx.save();
     
-    // Render the base object (border, background, etc.)
-    this.callSuper('_render', ctx);
+    // Translate to center the grid within the Fabric.js object bounds
+    ctx.translate(-this.width/2, -this.height/2);
     
-    // Update grid if it exists
-    if (this.grid) {
-      this.grid.update2({
-        x: this.center.x,
-        y: this.center.y,
-        zoom: this.zoom
-      });
-      
-      // Draw the grid onto the main context
-      ctx.drawImage(this.gridCanvas, -this.width/2, -this.height/2, this.width, this.height);
-    }
+    // Let Grid draw directly to the Fabric.js context
+    this.grid.draw();
     
     // Restore context state
     ctx.restore();
+    
+    // Restore grid's original context
+    this.grid.context = originalContext;
   },
   
   /**
@@ -111,62 +129,33 @@ fabric.Schematic = fabric.util.createClass(fabric.Object, {
    * @param {number} zoom - The zoom level to set
    */
   setZoom: function(zoom) {
-    this.zoom = clamp(zoom, this.minZoom, this.maxZoom);
+    this.zoom = clamp(zoom, this.minZoom || 0.1, this.maxZoom || 10);
     this.dx = 0;
     this.dy = 0;
     
-    // Trigger an update and re-render
-    this.update();
+    // Trigger re-render using Fabric.js methods
     this.canvas && this.canvas.requestRenderAll();
   },
   
   /**
-   * Get the bounds of all objects within the schematic
+   * Get the bounds of the schematic
    * @returns {Array} - Array of points representing the bounds
    */
   getBounds: function() {
-    if (!this.canvas) return [
-      new FabricLayersPoint(0, 0),
-      new FabricLayersPoint(this.width, this.height)
-    ];
+    const width = this.width || 500;
+    const height = this.height || 500;
     
-    let minX = Infinity;
-    let maxX = -Infinity;
-    let minY = Infinity;
-    let maxY = -Infinity;
-
-    this.canvas.forEachObject(obj => {
-      if (obj === this) return; // Skip self
-      
-      const coords = obj.getBoundingRect();
-      
-      minX = Math.min(minX, coords.left);
-      maxX = Math.max(maxX, coords.left + coords.width);
-      minY = Math.min(minY, coords.top);
-      maxY = Math.max(maxY, coords.top + coords.height);
-    });
-
-    // If no objects found, use self dimensions
-    if (minX === Infinity) {
-      minX = -this.width/2;
-      maxX = this.width/2;
-      minY = -this.height/2;
-      maxY = this.height/2;
-    }
-
     return [
-      new FabricLayersPoint(minX, minY),
-      new FabricLayersPoint(maxX, maxY)
+      new FabricLayersPoint(-width/2, -height/2),
+      new FabricLayersPoint(width/2, height/2)
     ];
   },
   
   /**
-   * Fit the schematic bounds to contain all objects
+   * Fit the schematic bounds
    * @param {number} padding - Padding around the bounds
    */
   fitBounds: function(padding = 100) {
-    if (!this.canvas) return;
-    
     const bounds = this.getBounds();
     
     this.center.x = (bounds[0].x + bounds[1].x) / 2.0;
@@ -176,13 +165,11 @@ fabric.Schematic = fabric.util.createClass(fabric.Object, {
     const boundHeight = Math.abs(bounds[0].y - bounds[1].y) + padding;
     
     // Calculate optimal zoom to fit
-    const zoomX = this.width / boundWidth;
-    const zoomY = this.height / boundHeight;
+    const zoomX = (this.width || 500) / boundWidth;
+    const zoomY = (this.height || 500) / boundHeight;
     const zoom = Math.min(zoomX, zoomY);
     
     this.setZoom(zoom);
-    this.update();
-    
     this.canvas && this.canvas.requestRenderAll();
   },
   
@@ -201,9 +188,8 @@ fabric.Schematic = fabric.util.createClass(fabric.Object, {
    */
   reset: function() {
     Object.assign(this, this.defaults);
-    this.center = new FabricLayersPoint(this.center);
+    this.center = new FabricLayersPoint(this.center || { x: 0, y: 0 });
     
-    this.update();
     this.canvas && this.canvas.requestRenderAll();
   },
   
@@ -213,43 +199,8 @@ fabric.Schematic = fabric.util.createClass(fabric.Object, {
    * @param {number} height - New height
    */
   onResize: function(width, height) {
-    if (!width || !height) {
-      width = this.canvas ? this.canvas.getWidth() : 500;
-      height = this.canvas ? this.canvas.getHeight() : 500;
-    }
-    
-    this.width = width;
-    this.height = height;
-    
-    if (this.grid) {
-      this.grid.setSize(width, height);
-    }
-    
-    this.update();
-  },
-  
-  /**
-   * Update the schematic state
-   */
-  update: function() {
-    if (this.grid) {
-      this.grid.update2({
-        x: this.center.x,
-        y: this.center.y,
-        zoom: this.zoom
-      });
-      
-      this.grid.render();
-    }
-    
-    this.fire('update', this);
-    
-    // Set cursor based on mode
-    if (this.isGrabMode() || this.isRight) {
-      this.setCursor('grab');
-    } else {
-      this.setCursor('pointer');
-    }
+    this.width = width || this.width || 500;
+    this.height = height || this.height || 500;
     
     this.canvas && this.canvas.requestRenderAll();
   },
@@ -259,18 +210,17 @@ fabric.Schematic = fabric.util.createClass(fabric.Object, {
    * @param {Object} e - Event object with dx, dy, dz properties
    */
   panzoom: function(e) {
-    const { width, height } = { width: this.width, height: this.height };
+    const width = this.width || 500;
+    const height = this.height || 500;
     const zoom = clamp(-e.dz, -height * 0.75, height * 0.75) / height;
 
     const prevZoom = 1 / this.zoom;
     let curZoom = prevZoom * (1 - zoom);
-    curZoom = clamp(curZoom, this.minZoom, this.maxZoom);
+    curZoom = clamp(curZoom, this.minZoom || 0.1, this.maxZoom || 10);
 
     let { x, y } = this.center;
 
-    // pan
-    const oX = 0.5;
-    const oY = 0.5;
+    // Handle panning
     if (this.isGrabMode() || e.isRight) {
       x -= prevZoom * e.dx;
       y += prevZoom * e.dy;
@@ -279,16 +229,12 @@ fabric.Schematic = fabric.util.createClass(fabric.Object, {
       this.setCursor('pointer');
     }
 
-    if (this.zoomEnabled) {
-      let tx, ty;
-      if (this.grid && this.grid.zoomOverMouse) {
-        // Zoom centered on mouse position
-        tx = e.x / width - oX;
-        ty = oY - e.y / height;
-      } else {
-        // Zoom centered on viewport center
-        tx = 0;
-        ty = 0;
+    // Handle zooming
+    if (this.zoomEnabled !== false) {
+      let tx = 0, ty = 0;
+      if (this.zoomOverMouse) {
+        tx = e.x / width - 0.5;
+        ty = 0.5 - e.y / height;
       }
       x -= width * (curZoom - prevZoom) * tx;
       y -= height * (curZoom - prevZoom) * ty;
@@ -299,11 +245,8 @@ fabric.Schematic = fabric.util.createClass(fabric.Object, {
     this.zoom = 1 / curZoom;
     this.dx = e.dx;
     this.dy = e.dy;
-    this.x = e.x0;
-    this.y = e.y0;
-    this.isRight = e.isRight;
 
-    this.update();
+    this.canvas && this.canvas.requestRenderAll();
   },
   
   /**
@@ -318,7 +261,7 @@ fabric.Schematic = fabric.util.createClass(fabric.Object, {
     view.y *= -1;
     this.center.copy(view);
     
-    this.update();
+    this.canvas && this.canvas.requestRenderAll();
   },
   
   /**
@@ -327,7 +270,7 @@ fabric.Schematic = fabric.util.createClass(fabric.Object, {
    */
   setOriginPin: function(corner) {
     this.originPin = corner;
-    if (this.grid) {  
+    if (this.grid) {
       this.grid.setOriginPin(corner);
     }
   },
@@ -355,24 +298,6 @@ fabric.Schematic = fabric.util.createClass(fabric.Object, {
   },
   
   /**
-   * Register event listeners
-   */
-  registerListeners: function() {
-    if (typeof window !== 'undefined') {
-      window.addEventListener('resize', this._onResize);
-    }
-  },
-  
-  /**
-   * Unregister event listeners
-   */
-  unregisterListeners: function() {
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('resize', this._onResize);
-    }
-  },
-  
-  /**
    * Check if in grab mode
    * @returns {boolean} - Whether in grab mode
    */
@@ -386,14 +311,6 @@ fabric.Schematic = fabric.util.createClass(fabric.Object, {
    */
   setMode: function(mode) {
     this.mode = mode;
-  },
-  
-  /**
-   * Clean up resources when removing this object
-   */
-  dispose: function() {
-    this.unregisterListeners();
-    this.callSuper('dispose');
   }
 });
 

@@ -18,10 +18,10 @@ Transform the existing `src/map/Map.js` class into a Fabric.js custom object in 
    - Replace all non-Fabric.js canvas operations with Fabric.js equivalents
 
 3. **Grid Integration Using Fabric.js Best Practices**
-   - Draw grid directly in the `_render` method using the provided context
-   - Use Fabric.js's built-in drawing methods and transformations
-   - Leverage caching for performance optimization
-   - Remove embedded HTML canvas elements in favor of direct rendering
+   - Use existing Grid class instance within Schematic for grid calculations and state
+   - Schematic acts as a view controller managing Grid instance and handling state
+   - Grid renders directly to Fabric.js context in Schematic's `_render` method
+   - Maintain Grid's existing functionality while integrating with Fabric.js lifecycle
 
 - Run `nvm i` before any command to ensure correct Node version
 - Use Yarn for package management
