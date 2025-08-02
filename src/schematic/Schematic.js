@@ -8,157 +8,108 @@ import { SchematicAdapter } from './SchematicAdapter';
 import { version } from '../../package.json';
 
 /**
- * Schematic object for fabric.js
- * @class Schematic
- * @extends {fabric.Object}
+ * Create Schematic class using fabric.util.createClass
+ * This avoids _defineProperty issues with Babel transpilation
  */
-export class Schematic extends fabric.Object {
-  /**
-   * Type of object
-   * @type {String}
-   * @default
-   */
-  static type = 'schematic';
-
-  /**
-   * Constructor for Schematic object
-   * @param {Object} [options] Options object
-   * @param {Number} [options.width=400] Width of the schematic
-   * @param {Number} [options.height=400] Height of the schematic
-   * @param {Number} [options.cellSize=40] Base cell size in pixels
-   * @param {String} [options.lineColor='rgba(0,0,0,0.3)'] Line color with alpha
-   * @param {Boolean} [options.showGrid=true] Whether to show the grid
-   */
-  constructor(options = {}) {
-    // Set defaults and call super
-    const defaults = {
-      width: 400,
-      height: 400,
-      fill: 'transparent',
-      stroke: 'transparent',
-      strokeWidth: 0,
-      originX: 'center',
-      originY: 'center',
-      lockRotation: true,
-      hasControls: false,
-      hasBorders: false,
-      selectable: false,
-      hoverCursor: 'default',
-      cellSize: 40,
-      lineColor: 'rgba(0,0,0,0.3)',
-      showGrid: true
-    };
-
-    super({...defaults, ...options});
-
-    // Initialize the adapter
+const Schematic = fabric.util.createClass(fabric.Object, {
+  type: 'schematic',
+  
+  initialize: function(options) {
+    options = options || {};
+    this.callSuper('initialize', options);
+    
+    this.width = options.width || 400;
+    this.height = options.height || 400;
+    this.cellSize = options.cellSize || 40;
+    this.lineColor = options.lineColor || 'rgba(0,0,0,0.3)';
+    this.showGrid = options.showGrid !== undefined ? options.showGrid : true;
+    
+    this.fill = 'transparent';
+    this.stroke = 'transparent';
+    this.strokeWidth = 0;
+    this.originX = 'center';
+    this.originY = 'center';
+    this.lockRotation = true;
+    this.hasControls = false;
+    this.hasBorders = false;
+    this.selectable = false;
+    this.hoverCursor = 'default';
+    
     this.adapter = new SchematicAdapter(this);
-    
-    // Set version
     this.version = version;
-    
-    // Initialize the schematic
-    this._initializeSchematic();
-  }
+  },
 
-  /**
-   * Initialize the schematic
-   * @private
-   */
-  _initializeSchematic() {
-    // Additional initialization code here
-  }
-
-  /**
-   * Renders the schematic on the canvas
-   * @param {CanvasRenderingContext2D} ctx Context to render on
-   * @private
-   */
-  _render(ctx) {
+  _render: function(ctx) {
     if (!this.showGrid) return;
-
-    // Save the context state
+    
+    // Save context state
     ctx.save();
-
-    // Draw the grid via adapter
-    this.adapter.drawGrid(ctx);
-
+    
+    // Translate to object center for fabric coordinate system
+    ctx.translate(-this.width/2, -this.height/2);
+    
+    // Use the adapter to render grid
+    this.adapter.render(ctx);
+    
     // Restore context state
     ctx.restore();
-  }
+  },
 
-  /**
-   * Get the cell size adjusted for zoom
-   * @returns {Number} Adjusted cell size
-   */
-  getAdjustedCellSize() {
+  getAdjustedCellSize: function() {
     return this.cellSize;
-  }
+  },
 
-  /**
-   * Set cell size with validation
-   * @param {Number} size New cell size
-   * @returns {Schematic} this instance for chaining
-   */
-  setCellSize(size) {
+  setCellSize: function(size) {
     if (typeof size === 'number' && size > 0) {
       this.cellSize = size;
       this.dirty = true;
       this.canvas && this.canvas.requestRenderAll();
     }
     return this;
-  }
+  },
 
-  /**
-   * Toggle grid visibility
-   * @param {Boolean} visible Whether the grid should be visible
-   * @returns {Schematic} this instance for chaining
-   */
-  setGridVisibility(visible) {
+  setGridVisibility: function(visible) {
     this.showGrid = !!visible;
+    this.adapter.setGridVisibility(visible);
     this.dirty = true;
     this.canvas && this.canvas.requestRenderAll();
     return this;
-  }
+  },
 
-  /**
-   * Set grid line color
-   * @param {String} color CSS color string
-   * @returns {Schematic} this instance for chaining
-   */
-  setLineColor(color) {
+  setLineColor: function(color) {
     if (color) {
       this.lineColor = color;
+      this.adapter.setLineColor(color);
       this.dirty = true;
       this.canvas && this.canvas.requestRenderAll();
     }
     return this;
-  }
+  },
 
   /**
    * Returns object representation of the schematic
    * @returns {Object} Object representation
    */
-  toObject() {
+  toObject: function() {
+    const baseObject = fabric.Object.prototype.toObject.call(this);
     return {
-      ...super.toObject(),
+      ...baseObject,
       cellSize: this.cellSize,
       lineColor: this.lineColor,
       showGrid: this.showGrid
     };
-  }
+  },
 
-  /**
-   * Creates an instance of Schematic from an object
-   * @static
-   * @param {Object} object Object to create an instance from
-   * @param {Function} [callback] Callback to invoke when the instance is created
-   */
-  static fromObject(object, callback) {
+  fromObject: function(object, callback) {
     return new Schematic(object);
   }
-}
+});
 
 // Register the Schematic class with fabric
 fabric.Schematic = Schematic;
 fabric.Schematic.fromObject = Schematic.fromObject;
+
+// Export the Schematic class
+export { Schematic };
+
+export default Schematic;

@@ -3,7 +3,7 @@
  * Adapter between Schematic Fabric.js object and grid drawing functionality
  */
 
-import { calcGridCoordinates } from '../utils/gridCalculations';
+// Uses grid calculation approach without importing Grid class directly
 
 /**
  * Adapter class to bridge between Fabric.js object model and grid calculations
@@ -15,70 +15,58 @@ export class SchematicAdapter {
    */
   constructor(schematic) {
     this.schematic = schematic;
-    this.gridCache = null;
-    this.lastCellSize = null;
-    this.lastWidth = null;
-    this.lastHeight = null;
   }
 
   /**
-   * Calculate grid coordinates
-   * @returns {Object} Grid coordinates
-   * @private
+   * Set canvas for rendering
+   * @param {CanvasRenderingContext2D} canvas Canvas rendering context
    */
-  _calculateGridCoordinates() {
-    const { width, height, cellSize } = this.schematic;
-    
-    // Return cached result if dimensions haven't changed
-    if (
-      this.gridCache && 
-      this.lastCellSize === cellSize && 
-      this.lastWidth === width && 
-      this.lastHeight === height
-    ) {
-      return this.gridCache;
-    }
-    
-    // Calculate new grid coordinates
-    this.gridCache = calcGridCoordinates(width, height, cellSize);
-    this.lastCellSize = cellSize;
-    this.lastWidth = width;
-    this.lastHeight = height;
-    
-    return this.gridCache;
+  setCanvas(canvas) {
+    // Removed canvas and grid initialization
   }
 
-  /**
-   * Draw grid lines on the provided context
-   * @param {CanvasRenderingContext2D} ctx Canvas rendering context
-   */
-  drawGrid(ctx) {
-    const { lineColor, width, height } = this.schematic;
-    const gridCoords = this._calculateGridCoordinates();
+  render(ctx) {
+    if (!this.schematic.showGrid) return;
     
-    // Set line style
+    const { width, height, cellSize, lineColor } = this.schematic;
+    
     ctx.strokeStyle = lineColor;
     ctx.lineWidth = 1;
     
-    // Start from the center and adjust for fabric.Object's coordinate system
-    const halfWidth = width / 2;
-    const halfHeight = height / 2;
+    // Draw grid lines using the same logic as existing Grid
+    const xLines = Math.floor(width / cellSize) + 1;
+    const yLines = Math.floor(height / cellSize) + 1;
     
-    // Draw vertical lines
-    gridCoords.xCoords.forEach(x => {
+    // Vertical lines
+    for (let i = 0; i <= xLines; i++) {
+      const x = i * cellSize - width/2;
       ctx.beginPath();
-      ctx.moveTo(x - halfWidth, -halfHeight);
-      ctx.lineTo(x - halfWidth, halfHeight);
+      ctx.moveTo(x, -height/2);
+      ctx.lineTo(x, height/2);
       ctx.stroke();
-    });
+    }
     
-    // Draw horizontal lines
-    gridCoords.yCoords.forEach(y => {
+    // Horizontal lines
+    for (let i = 0; i <= yLines; i++) {
+      const y = i * cellSize - height/2;
       ctx.beginPath();
-      ctx.moveTo(-halfWidth, y - halfHeight);
-      ctx.lineTo(halfWidth, y - halfHeight);
+      ctx.moveTo(-width/2, y);
+      ctx.lineTo(width/2, y);
       ctx.stroke();
-    });
+    }
+  }
+
+  setCellSize(size) {
+    // Grid logic would go here if we were using Grid class
+    // For now, the Schematic object handles updates
+  }
+
+  setLineColor(color) {
+    // Grid logic would go here if we were using Grid class
+  }
+
+  setGridVisibility(visible) {
+    // Grid logic would go here if we were using Grid class
   }
 
   /**
