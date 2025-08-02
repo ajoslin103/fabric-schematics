@@ -1,117 +1,57 @@
-# Fabric Schematics - Project Plan
+# Fabric Schematics - Single-Goal Project Plan
 
-## Project Overview
+## Primary Goal
 
-Fabric Schematics is a specialized library for creating schematic and diagram visualizations using Fabric.js as its foundation. The project evolves from fabric-layers-core, focusing on providing advanced grid functionality initially, with plans to expand into a comprehensive diagramming toolkit.
+Transform the existing `src/map/Map.js` class into a Fabric.js custom object in `src/schematic`.
 
-## Transition Process: fabric-layers-core → fabric-schematics
+## Implementation Process
 
-### Phase 1: Core Simplification (Completed)
+1. **Create Schematic Class**
+   - Create new file structure in `src/schematic/`
+   - Create `Schematic.js` that extends `fabric.Object`
+   - Set up required Fabric.js object properties and methods
 
-1. **Code Cleanup**
-   - Removed layer-related functionality from `Map.js`
-   - Simplified event listeners to focus on grid functionality
-   - Removed unused modes (MEASURE, DRAW) from `ModesMixin.js`
-   - Streamlined `Constants.js` to reflect simplified functionality
+2. **Code Migration**
+   - Copy core functionality from `Map.js` to `Schematic.js`
+   - Modify to work within Fabric.js object lifecycle
+   - Implement `_render(ctx)` method for Fabric.js rendering
 
-2. **Feature Focus**
-   - Maintained core grid functionality
-   - Preserved SELECT and GRAB modes for basic interaction
-   - Kept utility functions in `/src/lib` for future use
+3. **Grid Integration**
+   - Preserve grid drawing and calculation functionality
+   - Ensure grid properly scales with Fabric.js transformations
+   - Maintain zoom, pan and interactive features
 
-### Phase 2: Project Renaming (Completed)
+4. **Fabric.js Compatibility**
+   - Support standard object properties (left, top, width, height, angle)
+   - Implement object controls for resizing and rotation
+   - Ensure compatibility with canvas selection and active object handling
 
-1. **Package Identification**
-   - Renamed project to `fabric-schematics` in package.json
-   - Updated description to reflect schematic/diagram visualization focus
-   - Added relevant keywords for better discoverability
+## Technical Tasks
 
-2. **Global Namespace Update**
-   - Changed global JS namespace from `FabricLayers` to `FabricSchematics`
-   - Updated all canvas IDs and element references
-   - Revised documentation and demo files
+1. **Create Basic Structure**
+   ```javascript
+   fabric.Schematic = fabric.util.createClass(fabric.Object, {
+     // Copy relevant properties and methods from Map.js
+     // Implement required Fabric.js object methods
+   });
+   ```
 
-### Phase 3: Fabric.js Custom Objects (Current Focus)
+2. **Port Core Functions**
+   - Copy grid rendering logic
+   - Adapt zoom and pan functionality
+   - Convert coordinate systems where needed
 
-1. **Schematic Implementation**
-   - Create custom `Schematic` object by extending `fabric.Object` in a new `src/schematic` folder
-   - Use adapter pattern to integrate with existing grid functionality
-   - Implement `_render(ctx)` to handle grid drawing through the adapter
-   - Maintain existing Map class for compatibility while introducing new paradigm
+3. **Test Integration**
+   - Create test file to verify object rendering
+   - Verify interactions work properly
+   - Ensure serialization/deserialization works
 
-2. **Adapter Pattern Structure**
-   - Create clean separation between Fabric.js object model and grid calculations
-   - Utilize composition rather than inheritance from existing classes
-   - Define clear interfaces between Fabric.js object and underlying grid logic
-   - Avoid code duplication by referencing existing utility functions
+## Development Environment
 
-3. **API Development**
-   - Define clear interface for Schematic properties and methods
-   - Support standard Fabric.js properties (left, top, width, height, angle)
-   - Enable standard Fabric.js events (moving, scaling, rotating)
-   - Translate between Fabric.js and grid coordinate systems
-   - Address potential rendering performance considerations
-
-### Phase 4: Future Expansion
-
-1. **Additional Components**
-   - Markers and connector objects
-   - Measurement tools
-   - Technical diagramming elements
-
-2. **Enhanced Features**
-   - Multi-layer support (reimplemented with Fabric.js object hierarchy)
-   - Advanced styling options
-   - Import/export capabilities
-
-## Development Workflow
-
-1. **Environment Setup**
-   - Use Node.js with nvm for version management
-   - Run `nvm i` before any command to ensure correct Node version
-   - Use Yarn for package management
-
-2. **Building Process**
-   - `nvm i && yarn build` for production build
-   - `nvm i && yarn build:watch` for development
-   - Rollup and Babel for transpilation
-
-3. **Testing**
-   - Karma and Chrome Headless for unit tests
-   - Run tests with `nvm i && yarn test`
-   - Demo HTML files for manual verification
-
-## API Design Principles
-
-1. **Consistency with Fabric.js**
-   - Follow Fabric.js object model and event patterns
-   - Use Fabric.js rendering pipeline
-   - Support standard Fabric.js interactions
-
-2. **Simplicity and Flexibility**
-   - Provide sensible defaults
-   - Enable extensive customization options
-   - Ensure clean separation of concerns
-
-3. **Performance Optimization**
-   - Minimize redraws and calculations
-   - Efficient event handling
-   - Smart caching where appropriate
-
-## Documentation Strategy
-
-1. **Code Documentation**
-   - Clear JSDoc comments for API methods
-   - TypeScript definitions for better IDE support
-
-2. **Usage Examples**
-   - Demo applications demonstrating key features
-   - Code snippets for common use cases
-
-3. **Migration Guide**
-   - Instructions for users moving from fabric-layers-core
-   - Best practices for implementing with Fabric.js
+- Run `nvm i` before any command to ensure correct Node version
+- Use Yarn for package management
+- Build with `nvm i && yarn build` or `nvm i && yarn build:watch`
 
 ---
 
-This plan will be updated as the project evolves, with completed milestones marked and new objectives added as needed.
+This focused plan addresses our single goal of converting the Map class to a Fabric.js custom object.
