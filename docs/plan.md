@@ -13,8 +13,9 @@ Transform the existing `src/map/Map.js` class into a Fabric.js custom object in 
 
 2. **Code Migration**
    - Copy core functionality from `Map.js` to `Schematic.js`
-   - Modify to work within Fabric.js object lifecycle
+   - Modify to work within Fabric.js object lifecycle and use Fabric.js practices throughout
    - Implement `_render(ctx)` method for Fabric.js rendering
+   - Replace all non-Fabric.js canvas operations with Fabric.js equivalents
 
 3. **Grid Integration Using Fabric.js Best Practices**
    - Draw grid directly in the `_render` method using the provided context
