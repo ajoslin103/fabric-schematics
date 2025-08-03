@@ -2,7 +2,7 @@
 
 A schematic and diagram visualization library for [fabric.js](https://fabricjs.com/) canvases, with advanced grid system for precise coordinate-based drawing.
 
-`fabric-schematics` evolved from `fabric-layers-core` which was based on the excellent original work of [IndoorJS](https://github.com/mudin/indoorjs) by [Mudin](https://github.com/mudin).
+`fabric-schematics` is based on the excellent original work of [IndoorJS](https://github.com/mudin/indoorjs) by [Mudin](https://github.com/mudin).
 
 ---
 

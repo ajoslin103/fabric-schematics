@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schematic Demo</title>
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+        #canvas-container { border: 1px solid #ccc; margin: 20px 0; width: 800px; height: 600px; background: #f8f9fa; }
+        .controls { margin: 20px 0; padding: 15px; background: #f5f5f5; border-radius: 4px; }
+        button { padding: 8px 16px; margin-right: 10px; cursor: pointer; }
+        #coordinates { margin-left: 20px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>Schematic Demo</h1>
+    <div class="controls">
+        <label style="margin-right:10px;">
+          Min Zoom: <input id="minZoomInput" type="number" step="0.01" value="0.05" style="width:70px;">
+        </label>
+        <label style="margin-right:10px;">
+          Max Zoom: <input id="maxZoomInput" type="number" step="0.01" value="20" style="width:70px;">
+        </label>
+        <button id="resetView">Reset View</button>
+        <button id="toggleGrid">Toggle Grid</button>
+        <button id="updateCellSize">Zoom Schematic +20%</button>
+        <br><br>
+        <label style="margin-right:10px;">
+          Pin Origin: 
+          <select id="pinSelect" style="width:100px;">
+            <option value="NONE">None</option>
+            <option value="TOP_LEFT">Top Left</option>
+            <option value="TOP_RIGHT">Top Right</option>
+            <option value="BOTTOM_LEFT">Bottom Left</option>
+            <option value="BOTTOM_RIGHT">Bottom Right</option>
+          </select>
+        </label>
+        <label style="margin-right:10px;">
+          Pin Margin: <input id="pinMarginInput" type="number" step="1" value="10" style="width:70px;">
+        </label>
+        <label style="margin-right:10px;">
+          <input id="zoomOverMouse" type="checkbox" checked> Zoom Follows Mouse
+        </label>
+        <br><br>
+        <span id="coordinates">X: 0, Y: 0</span>
+        <span id="zoomLevel" style="margin-left: 20px; font-family: monospace;">Zoom: 1.00x</span>
+    </div>
+    <div id="canvas-container">
+        <canvas id="fabric-canvas"></canvas>
+    </div>
+
+    <!-- Load fabric -browser from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.2.2-browser/dist/fabric.min.js"></script>
+
+    <!-- Load EventEmitter2 from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/eventemitter2@6.4.9/lib/eventemitter2.min.js"></script>
+
+    <!-- Load fabric-schematics from local build -->
+    <script src="dist/index.umd.js"></script>
+    
+    <script>
+      // Wait for DOM
+      window.addEventListener('DOMContentLoaded', function() {
+        console.log('fabric available?', !!window.fabric);
+        console.log('Fabric version:', fabric.version);
+        
+        // Get container
+        const container = document.getElementById('canvas-container');
+
+        // Create a canvas with fabric.js
+        const canvas = new fabric.Canvas('fabric-canvas', {
+          width: 800,
+          height: 600,
+          selection: false, // Disable group selection
+          renderOnAddRemove: true,
+          backgroundColor: '#f8f9fa'
+        });
+        
+        // Create our schematic object using the library
+        const schematic = new fabric.Schematic({
+          width: 400,
+          height: 300,
+          showGrid: true,
+          originPin: 'NONE',
+          pinMargin: 10,
+          zoomOverMouse: true
+        });
+        
+        // Position the schematic on canvas
+        schematic.set({
+          left: 200,
+          top: 150,
+          selectable: true,
+          moveable: true
+        });
+        
+        // Add to canvas
+        canvas.add(schematic);
+        
+        // Add a simple rectangle to test Grid's canvas clearing behavior
+        const testRect = new fabric.Rect({
+          left: 50,
+          top: 50,
+          width: 100,
+          height: 80,
+          fill: 'rgba(255, 0, 0, 0.5)',
+          stroke: 'red',
+          strokeWidth: 2
+        });
+        canvas.add(testRect);
+        
+        // Add a circle to test multiple objects
+        const testCircle = new fabric.Circle({
+          left: 600,
+          top: 400,
+          radius: 40,
+          fill: 'rgba(0, 255, 0, 0.5)',
+          stroke: 'green',
+          strokeWidth: 2
+        });
+        canvas.add(testCircle);
+        
+        canvas.renderAll();
+        
+        console.log('Demo initialized with:');
+        console.log('- Schematic object at (200, 150)');
+        console.log('- Test rectangle at (50, 50)');
+        console.log('- Test circle at (600, 400)');
+        console.log('Watch console for Grid behavior...');
+
+        // Development helper for logging
+        function logEvent(title, data) {
+          console.debug(title, data);
+        }
+
+        // UI controls
+        document.getElementById('resetView').onclick = function() {
+          // Reset zoom and position
+          canvas.setZoom(1);
+          canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+          
+          // Reset schematic properties
+          schematic.zoom = 1;
+          schematic.center.setX(0);
+          schematic.center.setY(0);
+          
+          canvas.renderAll();
+          console.log('View reset - schematic zoom:', schematic.zoom, 'center:', schematic.center);
+        };
+
+        // Wire pin select & margin
+        const pinSelect = document.getElementById('pinSelect');
+        const pinMarginInput = document.getElementById('pinMarginInput');
+        const zoomOverMouseInput = document.getElementById('zoomOverMouse');
+        pinSelect.addEventListener('change', function() {
+          const pinValue = this.value;
+          schematic.setOriginPin(pinValue);
+          canvas.renderAll();
+          console.log('Pin origin set to:', pinValue);
+        });
+        
+        pinMarginInput.addEventListener('change', function() {
+          const margin = parseFloat(this.value) || 10;
+          schematic.setPinMargin(margin);
+          canvas.renderAll();
+          console.log('Pin margin set to:', margin);
+        });
+        
+        zoomOverMouseInput.addEventListener('change', function() {
+          const followMouse = this.checked;
+          schematic.setZoomOverMouse(followMouse);
+          console.log('Zoom over mouse set to:', followMouse);
+        });
+
+        // Wire min/max zoom inputs
+        const minZoomInput = document.getElementById('minZoomInput');
+        const maxZoomInput = document.getElementById('maxZoomInput');
+        function updateZoomLimits() {
+          let min = parseFloat(minZoomInput.value);
+          let max = parseFloat(maxZoomInput.value);
+          if (isNaN(min) || min <= 0) min = 0.01;
+          if (isNaN(max) || max <= min) max = min + 0.01;
+          // Set zoom limits on the canvas
+          console.log(`Setting zoom limits: ${min} to ${max}`);
+        }
+        minZoomInput.addEventListener('change', updateZoomLimits);
+        maxZoomInput.addEventListener('change', updateZoomLimits);
+        // Set initial limits
+        updateZoomLimits();
+
+        // Mouse coordinates display and zoom display
+        const coords = document.getElementById('coordinates');
+        const zoomSpan = document.getElementById('zoomLevel');
+        
+        function updateZoomDisplay() {
+          const zoom = canvas.getZoom() || 1;
+          zoomSpan.textContent = `Zoom: ${zoom.toFixed(2)}x`;
+        }
+        
+        // Track mouse coordinates
+        canvas.on('mouse:move', function(e) {
+          if (e && e.pointer) {
+            coords.textContent = `X: ${e.pointer.x.toFixed(1)}, Y: ${e.pointer.y.toFixed(1)}`;
+          }
+        });
+        
+        canvas.on('mouse:out', function() {
+          coords.textContent = 'X: -, Y: -';
+        });
+        
+        // Update zoom display when canvas is zoomed
+        canvas.on('zoom:change', updateZoomDisplay);
+        canvas.on('after:render', updateZoomDisplay);
+        
+        // Enable pan/zoom behavior
+        canvas.on('mouse:wheel', function(opt) {
+          const delta = opt.e.deltaY;
+          let zoom = canvas.getZoom();
+          zoom *= 0.999 ** delta;
+          if (zoom > 20) zoom = 20;
+          if (zoom < 0.01) zoom = 0.01;
+          canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
+          opt.e.preventDefault();
+          opt.e.stopPropagation();
+          updateZoomDisplay();
+        });
+        
+        // Enable panning with middle mouse button
+        canvas.on('mouse:down', function(opt) {
+          const evt = opt.e;
+          if (evt.button === 1 || evt.altKey) { // Middle button or Alt+click
+            this.isDragging = true;
+            this.lastPosX = evt.clientX;
+            this.lastPosY = evt.clientY;
+            console.log('Pan start');
+          }
+        });
+        
+        canvas.on('mouse:move', function(opt) {
+          if (this.isDragging) {
+            const e = opt.e;
+            const vpt = this.viewportTransform;
+            vpt[4] += e.clientX - this.lastPosX;
+            vpt[5] += e.clientY - this.lastPosY;
+            this.requestRenderAll();
+            this.lastPosX = e.clientX;
+            this.lastPosY = e.clientY;
+          }
+        });
+        
+        canvas.on('mouse:up', function(opt) {
+          this.isDragging = false;
+        });
+        
+        // Initial display
+        updateZoomDisplay();
+        
+        // Handle toggle grid button
+        document.getElementById('toggleGrid').addEventListener('click', function() {
+          schematic.showGrid = !schematic.showGrid;
+          canvas.renderAll();
+          console.log('Grid visibility toggled to:', schematic.showGrid);
+        });
+        
+        // Handle zoom change button (instead of cell size)
+        document.getElementById('updateCellSize').addEventListener('click', function() {
+          const currentZoom = schematic.zoom || 1;
+          const newZoom = currentZoom * 1.2;
+          schematic.setZoom(newZoom);
+          canvas.renderAll();
+          console.log('Schematic zoom changed to:', newZoom);
+        });
+        
+        // Add schematic-specific event listeners
+        schematic.on('update', function(data) {
+          console.log('Schematic update event:', data);
+        });
+        
+        // Test Grid assumptions by triggering renders
+        setInterval(function() {
+          if (Math.random() < 0.1) { // 10% chance every interval
+            console.log('Triggering canvas render to test Grid behavior...');
+            canvas.renderAll();
+          }
+        }, 2000);
+      });
+    </script>
+</body>
+</html>

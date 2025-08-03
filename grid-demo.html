@@ -48,6 +48,8 @@
     <!-- Load fabric -browser from CDN -->
     <script src="https://cdn.jsdelivr.net/npm/fabric@5.2.2-browser/dist/fabric.min.js"></script>
 
+    <!-- Load EventEmitter2 from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/eventemitter2@6.4.9/lib/eventemitter2.min.js"></script>
     <!-- load fabric-schematics from local build with cache busting -->
     <script src="dist/index.umd.js?v=20250731195900"></script>
     
@@ -81,6 +83,25 @@
           const { title, ...rest } = data;
           console.debug(title, rest);
         });
+        
+        // Add a circle and triangle to the fabric canvas
+        const circle = new fabric.Circle({
+          radius: 30,
+          fill: 'red',
+          left: 100,
+          top: 100
+        });
+        
+        const triangle = new fabric.Triangle({
+          width: 80,
+          height: 80,
+          fill: 'blue',
+          left: 200,
+          top: 100
+        });
+        
+        map.canvas.add(circle, triangle);
+        map.canvas.renderAll();
 
         // Show grid if not auto-enabled
         if (!map.grid) {
