@@ -8,9 +8,14 @@ import { FabricLayersPoint } from '../geometry/Point';
 import ModesMixin from './ModesMixin';
 import { mix } from '../lib/mix';
 
+import createEventSpy from '../utils/event-spy';
+const enableEventSpy = createEventSpy();
+
 export class Map extends mix(Base).with(ModesMixin) {
   constructor(container, options) {
     super(options);
+
+    enableEventSpy('map', this);
 
     this.defaults = Object.assign({}, MAP);
     
