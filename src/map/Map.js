@@ -104,7 +104,8 @@ export class Map extends mix(Base).with(ModesMixin) {
     clone.style.top = '0';
     clone.style.left = '0';
     
-    canvas.wrapperEl.appendChild(clone);
+    // Insert before the fabric canvas element
+    canvas.wrapperEl.insertBefore(clone, canvas.getElement());
     return clone;
   }
 
