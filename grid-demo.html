@@ -83,6 +83,25 @@
           const { title, ...rest } = data;
           console.debug(title, rest);
         });
+        
+        // Add a circle and triangle to the fabric canvas
+        const circle = new fabric.Circle({
+          radius: 30,
+          fill: 'red',
+          left: 100,
+          top: 100
+        });
+        
+        const triangle = new fabric.Triangle({
+          width: 80,
+          height: 80,
+          fill: 'blue',
+          left: 200,
+          top: 100
+        });
+        
+        map.canvas.add(circle, triangle);
+        map.canvas.renderAll();
 
         // Show grid if not auto-enabled
         if (!map.grid) {
