@@ -58,9 +58,9 @@ export class Map extends mix(Base).with(ModesMixin) {
     this.dx = 0;
     this.dy = 0;
 
-    if (this.showGrid) {
-      this.addGrid();
-    }
+    // if (this.showGrid) {
+    //   this.addGrid();
+    // }
 
     this.setMode(this.mode || Modes.GRAB);
 
