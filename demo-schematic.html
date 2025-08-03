@@ -23,7 +23,7 @@
         </label>
         <button id="resetView">Reset View</button>
         <button id="toggleGrid">Toggle Grid</button>
-        <button id="updateCellSize">Cell Size +10</button>
+        <button id="updateCellSize">Zoom Schematic +20%</button>
         <br><br>
         <label style="margin-right:10px;">
           Pin Origin: 
@@ -78,22 +78,55 @@
         
         // Create our schematic object using the library
         const schematic = new fabric.Schematic({
-          width: 800,
-          height: 600,
-          cellSize: 40,
-          lineColor: 'rgba(0,0,120,0.2)',
-          showGrid: true
+          width: 400,
+          height: 300,
+          showGrid: true,
+          originPin: 'NONE',
+          pinMargin: 10,
+          zoomOverMouse: true
         });
         
-        // Center the schematic on canvas
+        // Position the schematic on canvas
         schematic.set({
-          left: canvas.width / 2,
-          top: canvas.height / 2
+          left: 200,
+          top: 150,
+          selectable: true,
+          moveable: true
         });
         
         // Add to canvas
         canvas.add(schematic);
+        
+        // Add a simple rectangle to test Grid's canvas clearing behavior
+        const testRect = new fabric.Rect({
+          left: 50,
+          top: 50,
+          width: 100,
+          height: 80,
+          fill: 'rgba(255, 0, 0, 0.5)',
+          stroke: 'red',
+          strokeWidth: 2
+        });
+        canvas.add(testRect);
+        
+        // Add a circle to test multiple objects
+        const testCircle = new fabric.Circle({
+          left: 600,
+          top: 400,
+          radius: 40,
+          fill: 'rgba(0, 255, 0, 0.5)',
+          stroke: 'green',
+          strokeWidth: 2
+        });
+        canvas.add(testCircle);
+        
         canvas.renderAll();
+        
+        console.log('Demo initialized with:');
+        console.log('- Schematic object at (200, 150)');
+        console.log('- Test rectangle at (50, 50)');
+        console.log('- Test circle at (600, 400)');
+        console.log('Watch console for Grid behavior...');
 
         // Development helper for logging
         function logEvent(title, data) {
@@ -105,7 +138,14 @@
           // Reset zoom and position
           canvas.setZoom(1);
           canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+          
+          // Reset schematic properties
+          schematic.zoom = 1;
+          schematic.center.setX(0);
+          schematic.center.setY(0);
+          
           canvas.renderAll();
+          console.log('View reset - schematic zoom:', schematic.zoom, 'center:', schematic.center);
         };
 
         // Wire pin select & margin
@@ -113,13 +153,23 @@
         const pinMarginInput = document.getElementById('pinMarginInput');
         const zoomOverMouseInput = document.getElementById('zoomOverMouse');
         pinSelect.addEventListener('change', function() {
-          console.log('Pin setting not implemented in Schematic demo');
+          const pinValue = this.value;
+          schematic.setOriginPin(pinValue);
+          canvas.renderAll();
+          console.log('Pin origin set to:', pinValue);
         });
+        
         pinMarginInput.addEventListener('change', function() {
-          console.log('Margin change not implemented in Schematic demo');
+          const margin = parseFloat(this.value) || 10;
+          schematic.setPinMargin(margin);
+          canvas.renderAll();
+          console.log('Pin margin set to:', margin);
         });
+        
         zoomOverMouseInput.addEventListener('change', function() {
-          console.log('Zoom over mouse not implemented in Schematic demo');
+          const followMouse = this.checked;
+          schematic.setZoomOverMouse(followMouse);
+          console.log('Zoom over mouse set to:', followMouse);
         });
 
         // Wire min/max zoom inputs
@@ -207,16 +257,32 @@
         
         // Handle toggle grid button
         document.getElementById('toggleGrid').addEventListener('click', function() {
-          schematic.setGridVisibility(!schematic.showGrid);
-          console.log('Grid visibility:', schematic.showGrid);
+          schematic.showGrid = !schematic.showGrid;
+          canvas.renderAll();
+          console.log('Grid visibility toggled to:', schematic.showGrid);
         });
         
-        // Handle cell size button
+        // Handle zoom change button (instead of cell size)
         document.getElementById('updateCellSize').addEventListener('click', function() {
-          const newSize = schematic.cellSize + 10;
-          schematic.setCellSize(newSize);
-          console.log('New cell size:', newSize);
+          const currentZoom = schematic.zoom || 1;
+          const newZoom = currentZoom * 1.2;
+          schematic.setZoom(newZoom);
+          canvas.renderAll();
+          console.log('Schematic zoom changed to:', newZoom);
         });
+        
+        // Add schematic-specific event listeners
+        schematic.on('update', function(data) {
+          console.log('Schematic update event:', data);
+        });
+        
+        // Test Grid assumptions by triggering renders
+        setInterval(function() {
+          if (Math.random() < 0.1) { // 10% chance every interval
+            console.log('Triggering canvas render to test Grid behavior...');
+            canvas.renderAll();
+          }
+        }, 2000);
       });
     </script>
 </body>

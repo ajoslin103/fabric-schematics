@@ -49,23 +49,41 @@ fabric.Schematic = fabric.util.createClass(fabric.Object, {
   },
 
   /**
-   * Initialize grid using the existing Grid class
+   * Initialize grid using the existing Grid class with Fabric.js canvas
    * @private
    */
   _initializeGrid: function() {
-    // Create a virtual canvas for the Grid class to use
-    // This canvas will not be added to DOM - Grid will render to Fabric.js context
-    this._virtualCanvas = document.createElement('canvas');
-    this._virtualCanvas.width = this.width || 500;
-    this._virtualCanvas.height = this.height || 500;
+    // We'll set up the grid once the Schematic is added to a canvas
+    this.grid = null;
+    this._gridInitialized = false;
+  },
+  
+  /**
+   * Initialize grid with Fabric.js canvas (called when added to canvas)
+   * @private
+   */
+  _setupGridWithFabricCanvas: function() {
+    if (this._gridInitialized || !this.canvas) return;
     
-    // Create Grid instance with virtual canvas
-    this.grid = new Grid(this._virtualCanvas, this);
+    // Get the underlying HTML canvas element from Fabric.js canvas
+    const fabricCanvasElement = this.canvas.getElement();
+    
+    // Create Grid instance with Fabric.js canvas element
+    this.grid = new Grid(fabricCanvasElement, this);
     
     // Set grid properties from schematic settings
     this.grid.setOriginPin(this.originPin);
     this.grid.setPinMargin(this.pinMargin);
     this.grid.setZoomOverMouse(this.zoomOverMouse);
+    
+    this._gridInitialized = true;
+    
+    console.log('Grid initialized with Fabric.js canvas:', {
+      fabricCanvas: this.canvas,
+      htmlCanvas: fabricCanvasElement,
+      canvasWidth: fabricCanvasElement.width,
+      canvasHeight: fabricCanvasElement.height
+    });
   },
   
   /**
@@ -73,17 +91,10 @@ fabric.Schematic = fabric.util.createClass(fabric.Object, {
    * @private
    */
   _updateGrid: function() {
+    // Ensure grid is initialized with Fabric.js canvas
+    this._setupGridWithFabricCanvas();
+    
     if (!this.grid) return;
-    
-    // Update virtual canvas size if needed
-    const width = this.width || 500;
-    const height = this.height || 500;
-    
-    if (this._virtualCanvas.width !== width || this._virtualCanvas.height !== height) {
-      this._virtualCanvas.width = width;
-      this._virtualCanvas.height = height;
-      this.grid.setSize(width, height);
-    }
     
     // Update grid with current center and zoom
     this.grid.update2({
@@ -91,37 +102,36 @@ fabric.Schematic = fabric.util.createClass(fabric.Object, {
       y: this.center.y,
       zoom: this.zoom
     });
+    
+    console.log('Grid updated with state:', {
+      center: this.center,
+      zoom: this.zoom,
+      gridCanvas: this.grid.canvas,
+      gridCanvasSize: { width: this.grid.canvas.width, height: this.grid.canvas.height }
+    });
   },
   
   /**
-   * Main rendering function using Grid class with Fabric.js context
+   * Main rendering function - let Grid draw directly to its Fabric.js canvas
    * @param {CanvasRenderingContext2D} ctx - The canvas context to render to
    * @private
    */
   _render: function(ctx) {
-    if (!this.showGrid || !this.grid) return;
+    if (!this.showGrid) return;
     
     // Update grid state
     this._updateGrid();
     
-    // Temporarily replace grid's context with Fabric.js context
-    const originalContext = this.grid.context;
-    this.grid.context = ctx;
+    if (!this.grid) return;
     
-    // Save context state
-    ctx.save();
+    console.log('Schematic _render called, letting Grid draw to Fabric.js canvas');
     
-    // Translate to center the grid within the Fabric.js object bounds
-    ctx.translate(-this.width/2, -this.height/2);
-    
-    // Let Grid draw directly to the Fabric.js context
+    // Let Grid draw directly to its canvas (which is the Fabric.js canvas)
+    // This will show us exactly what assumptions Grid makes
     this.grid.draw();
     
-    // Restore context state
-    ctx.restore();
-    
-    // Restore grid's original context
-    this.grid.context = originalContext;
+    // Note: We're not doing any context manipulation here
+    // The Grid will draw directly to the Fabric.js canvas and we'll see what happens
   },
   
   /**
@@ -201,6 +211,12 @@ fabric.Schematic = fabric.util.createClass(fabric.Object, {
   onResize: function(width, height) {
     this.width = width || this.width || 500;
     this.height = height || this.height || 500;
+    
+    // Update grid size if it exists
+    if (this.grid) {
+      console.log('Resizing grid to:', { width: this.width, height: this.height });
+      this.grid.setSize(this.width, this.height);
+    }
     
     this.canvas && this.canvas.requestRenderAll();
   },
