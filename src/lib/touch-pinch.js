@@ -1,6 +1,9 @@
 import EventEmitter2 from 'eventemitter2';
 import eventOffset from './mouse-event-offset';
 
+import createEventSpy from '../utils/event-spy';
+const enableEventSpy = createEventSpy();
+
 function distance(a, b) {
   var x = b[0] - a[0],
       y = b[1] - a[1]
@@ -9,6 +12,9 @@ function distance(a, b) {
 
 export default touchPinch;
 function touchPinch (target) {
+
+  enableEventSpy('touch-pinch', this);
+
   target = target || window
 
   var emitter = new EventEmitter2()

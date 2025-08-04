@@ -8,9 +8,14 @@ import { FabricLayersPoint } from '../geometry/Point';
 import ModesMixin from './ModesMixin';
 import { mix } from '../lib/mix';
 
+import createEventSpy from '../utils/event-spy';
+const enableEventSpy = createEventSpy();
+
 export class Map extends mix(Base).with(ModesMixin) {
   constructor(container, options) {
     super(options);
+
+    enableEventSpy('map', this);
 
     this.defaults = Object.assign({}, MAP);
     
@@ -41,6 +46,15 @@ export class Map extends mix(Base).with(ModesMixin) {
     });
     this.context = this.canvas.getContext('2d');
 
+
+    const updateFabricZoom = (args) => {
+      const { zoom } = args;
+      console.debug(`this.fabric.setZoom(${zoom});`)
+      this.canvas && this.canvas.setZoom(zoom);
+    };
+    this.on('update', updateFabricZoom);
+
+
     this.on('render', () => {
       if (this.autostart) this.clear();
     });
@@ -58,9 +72,9 @@ export class Map extends mix(Base).with(ModesMixin) {
     this.dx = 0;
     this.dy = 0;
 
-    if (this.showGrid) {
-      this.addGrid();
-    }
+    // if (this.showGrid) {
+    //   this.addGrid();
+    // }
 
     this.setMode(this.mode || Modes.GRAB);
 
@@ -104,7 +118,8 @@ export class Map extends mix(Base).with(ModesMixin) {
     clone.style.top = '0';
     clone.style.left = '0';
     
-    canvas.wrapperEl.appendChild(clone);
+    // Insert before the fabric canvas element
+    canvas.wrapperEl.insertBefore(clone, canvas.getElement());
     return clone;
   }
 

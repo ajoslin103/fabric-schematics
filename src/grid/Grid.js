@@ -7,10 +7,16 @@ import gridStyle from './gridStyle';
 import Axis from './Axis';
 import { FabricLayersPoint } from '../geometry/Point';
 
+import createEventSpy from '../utils/event-spy';
+const enableEventSpy = createEventSpy();
+    
 // constructor
 class Grid extends Base {
   constructor(canvas, opts) {
     super(opts);
+    
+    enableEventSpy('grid', this);
+
     this.canvas = canvas;
     this.context = this.canvas.getContext('2d');
     this.state = {};
