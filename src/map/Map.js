@@ -33,23 +33,23 @@ export class Map extends mix(Base).with(ModesMixin) {
 
     this.container = container || document.body;
 
-    const canvas = document.createElement('canvas');
-    this.container.appendChild(canvas);
-    canvas.setAttribute('id', 'fabric-schematics-canvas');
+    const domCanvas = document.createElement('canvas');
+    this.container.appendChild(domCanvas);
+    domCanvas.setAttribute('id', 'fabric-schematics-canvas');
 
-    canvas.width = this.width || this.container.clientWidth;
-    canvas.height = this.height || this.container.clientHeight;
+    domCanvas.width = this.width || this.container.clientWidth;
+    domCanvas.height = this.height || this.container.clientHeight;
 
-    this.canvas = new fabric.Canvas(canvas, {
+    this.canvas = new fabric.Canvas(domCanvas, {
       preserveObjectStacking: true,
       renderOnAddRemove: true
     });
     this.context = this.canvas.getContext('2d');
 
+    // objects are drifting between the map zoom and the fabric zoom
 
     const updateFabricZoom = (args) => {
       const { zoom } = args;
-      console.debug(`this.fabric.setZoom(${zoom});`)
       this.canvas && this.canvas.setZoom(zoom);
     };
     this.on('update', updateFabricZoom);
@@ -90,8 +90,6 @@ export class Map extends mix(Base).with(ModesMixin) {
     }, 300);
   }
 
-  // Layer functionality removed (not used in grid demo)
-
   addGrid() {
     this.gridCanvas = this.cloneCanvas();
     this.gridCanvas.setAttribute('id', 'fabric-schematics-grid-canvas');
@@ -104,8 +102,6 @@ export class Map extends mix(Base).with(ModesMixin) {
     
     this.grid.draw();
   }
-
-  // moveTo functionality removed (not used in grid demo)
 
   cloneCanvas(canvas) {
     canvas = canvas || this.canvas;
