@@ -10,19 +10,19 @@ const ModesMixin = superclass =>
 
       switch (mode) {
         case Modes.SELECT:
-          this.canvas.isDrawingMode = false;
-          this.canvas.interactive = true;
-          this.canvas.selection = true;
-          this.canvas.hoverCursor = 'default';
-          this.canvas.moveCursor = 'default';
+          this.fabric.isDrawingMode = false;
+          this.fabric.interactive = true;
+          this.fabric.selection = true;
+          this.fabric.hoverCursor = 'default';
+          this.fabric.moveCursor = 'default';
           break;
         case Modes.GRAB:
-          this.canvas.isDrawingMode = false;
-          this.canvas.interactive = false;
-          this.canvas.selection = false;
-          this.canvas.discardActiveObject();
-          this.canvas.hoverCursor = 'move';
-          this.canvas.moveCursor = 'move';
+          this.fabric.isDrawingMode = false;
+          this.fabric.interactive = false;
+          this.fabric.selection = false;
+          this.fabric.discardActiveObject();
+          this.fabric.hoverCursor = 'move';
+          this.fabric.moveCursor = 'move';
           break;
 
         default:

@@ -33,24 +33,24 @@ export class Map extends mix(Base).with(ModesMixin) {
 
     this.container = container || document.body;
 
-    const canvas = document.createElement('canvas');
-    this.container.appendChild(canvas);
-    canvas.setAttribute('id', 'fabric-schematics-canvas');
+    const domCanvas = document.createElement('canvas');
+    this.container.appendChild(domCanvas);
+    domCanvas.setAttribute('id', 'fabric-schematics-canvas');
 
-    canvas.width = this.width || this.container.clientWidth;
-    canvas.height = this.height || this.container.clientHeight;
+    domCanvas.width = this.width || this.container.clientWidth;
+    domCanvas.height = this.height || this.container.clientHeight;
 
-    this.canvas = new fabric.Canvas(canvas, {
+    this.fabric = new fabric.Canvas(domCanvas, {
       preserveObjectStacking: true,
       renderOnAddRemove: true
     });
-    this.context = this.canvas.getContext('2d');
+    this.context = this.fabric.getContext('2d');
 
+    // objects are drifting between the map zoom and the fabric zoom
 
     const updateFabricZoom = (args) => {
       const { zoom } = args;
-      console.debug(`this.fabric.setZoom(${zoom});`)
-      this.canvas && this.canvas.setZoom(zoom);
+      this.fabric && this.fabric.setZoom(zoom);
     };
     this.on('update', updateFabricZoom);
 
@@ -59,10 +59,10 @@ export class Map extends mix(Base).with(ModesMixin) {
       if (this.autostart) this.clear();
     });
 
-    this.originX = -this.canvas.width / 2;
-    this.originY = -this.canvas.height / 2;
+    this.originX = -this.fabric.width / 2;
+    this.originY = -this.fabric.height / 2;
 
-    this.canvas.absolutePan({
+    this.fabric.absolutePan({
       x: this.originX,
       y: this.originY
     });
@@ -90,8 +90,6 @@ export class Map extends mix(Base).with(ModesMixin) {
     }, 300);
   }
 
-  // Layer functionality removed (not used in grid demo)
-
   addGrid() {
     this.gridCanvas = this.cloneCanvas();
     this.gridCanvas.setAttribute('id', 'fabric-schematics-grid-canvas');
@@ -105,10 +103,8 @@ export class Map extends mix(Base).with(ModesMixin) {
     this.grid.draw();
   }
 
-  // moveTo functionality removed (not used in grid demo)
-
   cloneCanvas(canvas) {
-    canvas = canvas || this.canvas;
+    canvas = canvas || this.fabric;
     const clone = document.createElement('canvas');
     clone.width = canvas.width;
     clone.height = canvas.height;
@@ -124,7 +120,7 @@ export class Map extends mix(Base).with(ModesMixin) {
   }
 
   setZoom(zoom) {
-    const { width, height } = this.canvas;
+    const { width, height } = this.fabric;
     this.zoom = clamp(zoom, this.minZoom, this.maxZoom);
     this.dx = 0;
     this.dy = 0;
@@ -142,7 +138,7 @@ export class Map extends mix(Base).with(ModesMixin) {
     let minY = Infinity;
     let maxY = -Infinity;
 
-    this.canvas.forEachObject(obj => {
+    this.fabric.forEachObject(obj => {
       const coords = obj.getBounds();
 
       coords.forEach(point => {
@@ -159,10 +155,10 @@ export class Map extends mix(Base).with(ModesMixin) {
   fitBounds(padding = 100) {
     this.onResize();
 
-    const { width, height } = this.canvas;
+    const { width, height } = this.fabric;
 
-    this.originX = -this.canvas.width / 2;
-    this.originY = -this.canvas.height / 2;
+    this.originX = -this.fabric.width / 2;
+    this.originY = -this.fabric.height / 2;
 
     const bounds = this.getBounds();
 
@@ -176,9 +172,9 @@ export class Map extends mix(Base).with(ModesMixin) {
 
     this.zoom = Math.min(scaleX, scaleY);
 
-    this.canvas.setZoom(this.zoom);
+    this.fabric.setZoom(this.zoom);
 
-    this.canvas.absolutePan({
+    this.fabric.absolutePan({
       x: this.originX + this.center.x * this.zoom,
       y: this.originY - this.center.y * this.zoom
     });
@@ -194,12 +190,12 @@ export class Map extends mix(Base).with(ModesMixin) {
   }
 
   reset() {
-    const { width, height } = this.canvas;
+    const { width, height } = this.fabric;
     this.zoom = this._options.zoom || 1;
     this.center = new FabricLayersPoint();
-    this.originX = -this.canvas.width / 2;
-    this.originY = -this.canvas.height / 2;
-    this.canvas.absolutePan({
+    this.originX = -this.fabric.width / 2;
+    this.originY = -this.fabric.height / 2;
+    this.fabric.absolutePan({
       x: this.originX,
       y: this.originY
     });
@@ -212,14 +208,14 @@ export class Map extends mix(Base).with(ModesMixin) {
   }
 
   onResize(width, height) {
-    const oldWidth = this.canvas.width;
-    const oldHeight = this.canvas.height;
+    const oldWidth = this.fabric.width;
+    const oldHeight = this.fabric.height;
 
     width = width || this.container.clientWidth;
     height = height || this.container.clientHeight;
 
-    this.canvas.setWidth(width);
-    this.canvas.setHeight(height);
+    this.fabric.setWidth(width);
+    this.fabric.setHeight(height);
 
     if (this.grid) {
       this.grid.setSize(width, height);
@@ -228,7 +224,7 @@ export class Map extends mix(Base).with(ModesMixin) {
     const dx = width / 2.0 - oldWidth / 2.0;
     const dy = height / 2.0 - oldHeight / 2.0;
 
-    this.canvas.relativePan({
+    this.fabric.relativePan({
       x: dx,
       y: dy
     });
@@ -237,7 +233,7 @@ export class Map extends mix(Base).with(ModesMixin) {
   }
 
   update() {
-    const canvas = this.canvas;
+    const canvas = this.fabric;
 
     if (this.grid) {
       this.grid.update2({
@@ -285,7 +281,7 @@ export class Map extends mix(Base).with(ModesMixin) {
   }
 
   panzoom(e) {
-    const { width, height } = this.canvas;
+    const { width, height } = this.fabric;
     const zoom = clamp(-e.dz, -height * 0.75, height * 0.75) / height;
 
     const prevZoom = 1 / this.zoom;
@@ -344,9 +340,9 @@ export class Map extends mix(Base).with(ModesMixin) {
 
     this.center.copy(view);
 
-    this.canvas.relativePan(new FabricLayersPoint(dx * this.zoom, dy * this.zoom));
+    this.fabric.relativePan(new FabricLayersPoint(dx * this.zoom, dy * this.zoom));
 
-    this.canvas.renderAll();
+    this.fabric.renderAll();
 
     this.update();
 
@@ -386,8 +382,8 @@ export class Map extends mix(Base).with(ModesMixin) {
   }
 
   unregisterListeners() {
-    this.canvas.off('object:moving');
-    this.canvas.off('object:moved');
+    this.fabric.off('object:moving');
+    this.fabric.off('object:moved');
   }
 
   // Marker functionality removed (not used in grid demo)
