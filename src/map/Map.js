@@ -46,6 +46,15 @@ export class Map extends mix(Base).with(ModesMixin) {
     });
     this.context = this.canvas.getContext('2d');
 
+
+    const updateFabricZoom = (args) => {
+      const { zoom } = args;
+      console.debug(`this.fabric.setZoom(${zoom});`)
+      this.canvas && this.canvas.setZoom(zoom);
+    };
+    this.on('update', updateFabricZoom);
+
+
     this.on('render', () => {
       if (this.autostart) this.clear();
     });
