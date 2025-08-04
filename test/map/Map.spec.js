@@ -17,7 +17,7 @@ describe('Map', () => {
 
   afterEach(() => {
     if (map) {
-      map.canvas.dispose();
+      map.fabric.dispose();
     }
     cleanupTestContainer(container);
   });
@@ -65,7 +65,7 @@ describe('Map', () => {
       return new Promise((resolve) => {
         map.on('test:added', (addedLayer) => {
           expect(addedLayer).to.equal(layer);
-          expect(map.canvas.getObjects()).to.include(layer.shape);
+          expect(map.fabric.getObjects()).to.include(layer.shape);
           resolve();
         });
         
@@ -89,7 +89,7 @@ describe('Map', () => {
         
         map.on('test:removed', (removedLayer) => {
           expect(removedLayer).to.equal(layer);
-          expect(map.canvas.getObjects()).to.not.include(rect);
+          expect(map.fabric.getObjects()).to.not.include(rect);
           resolve();
         });
         
