@@ -1,5 +1,5 @@
-import { clamp, almost, len, parseUnit, toPx, isObj } from '../lib/mumath/index';
-import alpha from '../lib/color-alpha';
+import { clamp, almost, len, parseUnit, toPx, isObj } from './mumath/index';
+import alpha from './color-alpha';
 
 /**
  * Calculate pinned X position based on canvas width and zoom
@@ -239,4 +239,71 @@ export function calculateLabelPosition(labelCoords, index, width, height, paddin
   let textTop = labelCoords[index * 2 + 1] * (height - pt - pb) + textOffset + pt;
   
   return { textLeft, textTop };
+}
+
+/**
+ * Calculate axis updates for center, offset and zoom
+ */
+export function calculateAxisUpdates(center, isPinned, pinnedX, pinnedY) {
+  const updatedCenter = { ...center };
+  
+  if (isPinned) {
+    updatedCenter.x = pinnedX;
+    updatedCenter.y = pinnedY;
+  }
+  
+  return {
+    updatedCenter,
+    axisXOffset: updatedCenter.x,
+    axisYOffset: updatedCenter.y,
+    axisZoom: 1 / updatedCenter.zoom
+  };
+}
+
+/**
+ * Calculate axis line coordinates for rendering
+ */
+export function calculateAxisLineCoords(axisCoords, width, height, padding, left = 0, top = 0) {
+  if (!axisCoords || axisCoords.length < 4) {
+    return null;
+  }
+  
+  const [pt, pr, pb, pl] = padding;
+  
+  const x1 = left + pl + clamp(axisCoords[0], 0, 1) * (width - pr - pl);
+  const y1 = top + pt + clamp(axisCoords[1], 0, 1) * (height - pt - pb);
+  const x2 = left + pl + clamp(axisCoords[2], 0, 1) * (width - pr - pl);
+  const y2 = top + pt + clamp(axisCoords[3], 0, 1) * (height - pt - pb);
+  
+  return { x1, y1, x2, y2 };
+}
+
+/**
+ * Adjust label position based on constraints and orientation
+ */
+export function adjustLabelPosition(textLeft, textTop, label, orientation, width, height, textWidth, textHeight, indent, axisWidth, tickAlign) {
+  let finalTextLeft = textLeft;
+  let finalTextTop = textTop;
+  let displayLabel = label;
+  
+  if (orientation === 'y') {
+    finalTextLeft = clamp(textLeft, indent, width - textWidth - 1 - axisWidth);
+    displayLabel *= -1;
+  }
+  
+  if (orientation === 'x') {
+    const textOffset = tickAlign < 0.5 ? -textHeight - axisWidth * 2 : axisWidth * 2;
+    finalTextTop = clamp(textTop, 0, height - textHeight - textOffset);
+  }
+  
+  return { finalTextLeft, finalTextTop, displayLabel };
+}
+
+/**
+ * Determine if an axis line should be skipped (e.g., when it overlaps with origin)
+ */
+export function shouldSkipAxisLine(line, oppositeState) {
+  return oppositeState && 
+         oppositeState.coordinate && 
+         almost(line, oppositeState.coordinate.axisOrigin);
 }

@@ -13,8 +13,12 @@ import {
   calculateCoordinateState,
   calculateNormalVectors,
   calculateTickCoords,
-  calculateLabelPosition
-} from './grid-calcs';
+  calculateLabelPosition,
+  calculateAxisUpdates,
+  calculateAxisLineCoords,
+  adjustLabelPosition,
+  shouldSkipAxisLine
+} from '../lib/grid-calcs';
 
 import createEventSpy from '../utils/event-spy';
 const enableEventSpy = createEventSpy();
@@ -98,24 +102,30 @@ class Grid extends Base {
 
   // re-evaluate lines, calc options for renderer
   update2(center) {
-    if (this.isPinned) {
-      center.x = this.getPinnedX();
-      center.y = this.getPinnedY();
-    }
+    // Use pure function to calculate axis updates
+    const { updatedCenter, axisXOffset, axisYOffset, axisZoom } = calculateAxisUpdates(
+      center, 
+      this.isPinned, 
+      this.getPinnedX(), 
+      this.getPinnedY()
+    );
+    
     const shape = [this.canvas.width, this.canvas.height];
-    Object.assign(this.center, center);
+    Object.assign(this.center, updatedCenter);
+    
     // recalc state
     this.state.x = this.calcCoordinate(this.axisX, shape, this);
     this.state.y = this.calcCoordinate(this.axisY, shape, this);
     this.state.x.opposite = this.state.y;
     this.state.y.opposite = this.state.x;
-    this.emit('update', center);
+    this.emit('update', updatedCenter);
 
-    this.axisX.offset = center.x;
-    this.axisX.zoom = 1 / center.zoom;
+    // Apply the calculated axis parameters
+    this.axisX.offset = axisXOffset;
+    this.axisX.zoom = axisZoom;
 
-    this.axisY.offset = center.y;
-    this.axisY.zoom = 1 / center.zoom;
+    this.axisY.offset = axisYOffset;
+    this.axisY.zoom = axisZoom;
   }
 
   // get state object with calculated params, ready for rendering
@@ -277,8 +287,8 @@ class Grid extends Base {
     ctx.lineWidth = state.lineWidth / 2;
     
     for (let i = 0, j = 0; i < coords.length; i += 4, j += 1) {
-      if (state.opposite && state.opposite.coordinate && 
-          almost(state.lines[j], state.opposite.coordinate.axisOrigin)) continue;
+      // Use pure function to determine if line should be skipped
+      if (shouldSkipAxisLine(state.lines[j], state.opposite)) continue;
 
       // apply line color
       const color = state.lineColors[j];
@@ -321,8 +331,8 @@ class Grid extends Base {
       ctx.lineWidth = state.axisWidth / 2;
       ctx.beginPath();
       for (let i = 0, j = 0; i < tickCoords.length; i += 4, j += 1) {
-        if (state.opposite && state.opposite.coordinate && 
-            almost(state.lines[j], state.opposite.coordinate.axisOrigin)) continue;
+        // Use pure function to determine if tick should be skipped
+        if (shouldSkipAxisLine(state.lines[j], state.opposite)) continue;
         const x1 = left + pl + tickCoords[i] * (width - pl - pr);
         const y1 = top + pt + tickCoords[i + 1] * (height - pt - pb);
         const x2 = left + pl + tickCoords[i + 2] * (width - pl - pr);
@@ -343,15 +353,21 @@ class Grid extends Base {
         state.opposite
       );
       
-      if (axisCoords && axisCoords.length >= 4) {
+      // Use pure function to calculate axis line coordinates
+      const lineCoords = calculateAxisLineCoords(
+        axisCoords, 
+        width, 
+        height, 
+        state.padding, 
+        left, 
+        top
+      );
+      
+      if (lineCoords) {
         ctx.lineWidth = state.axisWidth / 2;
-        const x1 = left + pl + clamp(axisCoords[0], 0, 1) * (width - pr - pl);
-        const y1 = top + pt + clamp(axisCoords[1], 0, 1) * (height - pt - pb);
-        const x2 = left + pl + clamp(axisCoords[2], 0, 1) * (width - pr - pl);
-        const y2 = top + pt + clamp(axisCoords[3], 0, 1) * (height - pt - pb);
         ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
+        ctx.moveTo(lineCoords.x1, lineCoords.y1);
+        ctx.lineTo(lineCoords.x2, lineCoords.y2);
         ctx.strokeStyle = state.axisColor;
         ctx.stroke();
         ctx.closePath();
@@ -380,7 +396,8 @@ class Grid extends Base {
         let label = state.labels[i];
         if (label == null) continue;
         
-        if (isOpp && almost(state.lines[i], state.opposite.coordinate.axisOrigin)) continue;
+        // Use pure function to determine if label should be skipped
+        if (isOpp && shouldSkipAxisLine(state.lines[i], state.opposite)) continue;
         
         const textWidth = ctx.measureText(label).width;
         
@@ -397,19 +414,20 @@ class Grid extends Base {
           state.coordinate.orientation
         );
         
-        // Apply additional adjustments specific to this implementation
-        let finalTextLeft = textLeft;
-        let finalTextTop = textTop;
-        let displayLabel = label;
-        
-        if (state.coordinate.orientation === 'y') {
-          finalTextLeft = clamp(textLeft, indent, width - textWidth - 1 - state.axisWidth);
-          displayLabel *= -1;
-        }
-        
-        if (state.coordinate.orientation === 'x') {
-          finalTextTop = clamp(textTop, 0, height - textHeight - (state.tickAlign < 0.5 ? -textHeight - state.axisWidth * 2 : state.axisWidth * 2));
-        }
+        // Use pure function to adjust label position based on constraints
+        const { finalTextLeft, finalTextTop, displayLabel } = adjustLabelPosition(
+          textLeft,
+          textTop,
+          label,
+          state.coordinate.orientation,
+          width,
+          height,
+          textWidth,
+          textHeight,
+          indent,
+          state.axisWidth,
+          state.tickAlign
+        );
         
         ctx.fillText(displayLabel, finalTextLeft, finalTextTop);
       }
