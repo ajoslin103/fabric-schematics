@@ -1,11 +1,9 @@
-import { Point } from 'fabric';
-
 /**
- * Point class extending fabric.Point with additional functionality
+ * Point class with additional functionality
  * @param {number|{x: number, y: number}|Array<number>} x - X coordinate or point object/array
  * @param {number} [y] - Y coordinate if first parameter is a number
  */
-export class FabricLayersPoint extends Point {
+export class Point {
   /**
    * @param {number|{x: number, y: number}|Array<number>} x - X coordinate or point object/array
    * @param {number} [y] - Y coordinate if first parameter is a number
@@ -29,7 +27,8 @@ export class FabricLayersPoint extends Point {
       }
     }
 
-    super(xCoord, yCoord);
+    this.x = xCoord;
+    this.y = yCoord;
   }
 
   /**
@@ -68,4 +67,4 @@ export class FabricLayersPoint extends Point {
   }
 }
 
-export default FabricLayersPoint;
+export default Point;

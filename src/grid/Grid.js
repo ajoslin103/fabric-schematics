@@ -5,7 +5,7 @@ import {
 } from '../lib/mumath/index';
 import gridStyle from './gridStyle';
 import Axis from './Axis';
-import { FabricLayersPoint } from '../geometry/Point';
+import { Point } from '../geometry/Point';
 
 import createEventSpy from '../utils/event-spy';
 const enableEventSpy = createEventSpy();
@@ -360,7 +360,7 @@ class Grid extends Base {
     Object.assign(this, this.defaults);
     Object.assign(this, this._options);
 
-    this.center = new FabricLayersPoint(this.center);
+    this.center = new Point(this.center);
   }
 
   // draw grid to the canvas

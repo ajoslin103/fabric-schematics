@@ -1,4 +1,4 @@
-import { FabricLayersPoint } from '../geometry/Point.js';
+import { Point } from '../geometry/Point.js';
 import { FabricObject, Group } from 'fabric';
 
 export const Modes = {
@@ -15,7 +15,7 @@ export const OriginPin = {
 };
 
 export const MAP = {
-  center: new FabricLayersPoint(),
+  center: new Point(),
   zoom: 1,
   minZoom: 0,
   maxZoom: 20,
@@ -65,7 +65,7 @@ FabricObject.prototype.padding = 5;
 
 FabricObject.prototype.getBounds = function getBounds() {
   const coords = [];
-  coords.push(new FabricLayersPoint(this.left - this.width / 2.0, this.top - this.height / 2.0));
-  coords.push(new FabricLayersPoint(this.left + this.width / 2.0, this.top + this.height / 2.0));
+  coords.push(new Point(this.left - this.width / 2.0, this.top - this.height / 2.0));
+  coords.push(new Point(this.left + this.width / 2.0, this.top + this.height / 2.0));
   return coords;
 };

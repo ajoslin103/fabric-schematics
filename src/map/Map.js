@@ -4,7 +4,7 @@ import { clamp } from '../lib/mumath/index';
 import Base from '../core/Base';
 import { MAP } from '../core/Constants';
 import Grid from '../grid/Grid';
-import { FabricLayersPoint } from '../geometry/Point';
+import { Point } from '../geometry/Point';
 import ModesMixin from './ModesMixin';
 import { mix } from '../lib/mix';
 
@@ -29,7 +29,7 @@ export class Map extends mix(Base).with(ModesMixin) {
     // overwrite options
     Object.assign(this, this._options);
 
-    this.center = new FabricLayersPoint(this.center);
+    this.center = new Point(this.center);
 
     this.container = container || document.body;
 
@@ -108,8 +108,8 @@ export class Map extends mix(Base).with(ModesMixin) {
     const width = this.canvas.width;
     const height = this.canvas.height;
     return [
-      new FabricLayersPoint(-width/2, -height/2), 
-      new FabricLayersPoint(width/2, height/2)
+      new Point(-width/2, -height/2), 
+      new Point(width/2, height/2)
     ];
   }
 

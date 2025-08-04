@@ -1,5 +1,5 @@
 import { clamp } from '../lib/mumath/index';
-import { FabricLayersPoint } from '../geometry/Point';
+import { Point } from '../geometry/Point';
 import { MAP, Modes } from '../core/Constants';
 import Grid from '../grid/Grid';
 
@@ -26,7 +26,7 @@ fabric.Schematic = fabric.util.createClass(fabric.Object, {
     this.originPin = 'NONE';
     this.pinMargin = 10;
     this.zoomOverMouse = true;
-    this.center = new FabricLayersPoint(this.center || { x: 0, y: 0 });
+    this.center = new Point(this.center || { x: 0, y: 0 });
     
     // Override with provided options
     Object.assign(this, options);
@@ -156,8 +156,8 @@ fabric.Schematic = fabric.util.createClass(fabric.Object, {
     const height = this.height || 500;
     
     return [
-      new FabricLayersPoint(-width/2, -height/2),
-      new FabricLayersPoint(width/2, height/2)
+      new Point(-width/2, -height/2),
+      new Point(width/2, height/2)
     ];
   },
   
@@ -198,7 +198,7 @@ fabric.Schematic = fabric.util.createClass(fabric.Object, {
    */
   reset: function() {
     Object.assign(this, this.defaults);
-    this.center = new FabricLayersPoint(this.center || { x: 0, y: 0 });
+    this.center = new Point(this.center || { x: 0, y: 0 });
     
     this.canvas && this.canvas.requestRenderAll();
   },
