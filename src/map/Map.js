@@ -2,7 +2,7 @@ import panzoom from '../lib/panzoom'; // a smooth customer
 import { clamp } from '../lib/mumath/index';
 
 import Base from '../core/Base';
-import { MAP, Modes } from '../core/Constants';
+import { MAP } from '../core/Constants';
 import Grid from '../grid/Grid';
 import { FabricLayersPoint } from '../geometry/Point';
 import ModesMixin from './ModesMixin';
@@ -33,50 +33,22 @@ export class Map extends mix(Base).with(ModesMixin) {
 
     this.container = container || document.body;
 
-    const domCanvas = document.createElement('canvas');
-    this.container.appendChild(domCanvas);
-    domCanvas.setAttribute('id', 'fabric-schematics-canvas');
+    this.canvas = document.createElement('canvas');
+    this.container.appendChild(this.canvas);
+    this.canvas.setAttribute('id', 'schematics-canvas');
 
-    domCanvas.width = this.width || this.container.clientWidth;
-    domCanvas.height = this.height || this.container.clientHeight;
+    this.canvas.width = this.width || this.container.clientWidth;
+    this.canvas.height = this.height || this.container.clientHeight;
 
-    this.fabric = new fabric.Canvas(domCanvas, {
-      preserveObjectStacking: true,
-      renderOnAddRemove: true
-    });
-    this.context = this.fabric.getContext('2d');
+    // this.context = this.canvas.getContext('2d');
 
-    // objects are drifting between the map zoom and the fabric zoom
-
-    const updateFabricZoom = (args) => {
-      const { zoom } = args;
-      this.fabric && this.fabric.setZoom(zoom);
-    };
-    this.on('update', updateFabricZoom);
-
-
-    this.on('render', () => {
-      if (this.autostart) this.clear();
-    });
-
-    this.originX = -this.fabric.width / 2;
-    this.originY = -this.fabric.height / 2;
-
-    this.fabric.absolutePan({
-      x: this.originX,
-      y: this.originY
-    });
+    this.originX = -this.canvas.width / 2;
+    this.originY = -this.canvas.height / 2;
 
     this.x = this.center.x;
     this.y = this.center.y;
     this.dx = 0;
     this.dy = 0;
-
-    // if (this.showGrid) {
-    //   this.addGrid();
-    // }
-
-    this.setMode(this.mode || Modes.GRAB);
 
     const vm = this;
     panzoom(this.container, e => {
@@ -91,9 +63,9 @@ export class Map extends mix(Base).with(ModesMixin) {
   }
 
   addGrid() {
-    this.gridCanvas = this.cloneCanvas();
-    this.gridCanvas.setAttribute('id', 'fabric-schematics-grid-canvas');
-    this.grid = new Grid(this.gridCanvas, this);
+    // this.gridCanvas = this.cloneCanvas();
+    // this.gridCanvas.setAttribute('id', 'schematics-grid-canvas');
+    this.grid = new Grid(this.canvas, this);
     
     // Set grid properties from map settings
     this.grid.setOriginPin(this.originPin);
@@ -103,24 +75,23 @@ export class Map extends mix(Base).with(ModesMixin) {
     this.grid.draw();
   }
 
-  cloneCanvas(canvas) {
-    canvas = canvas || this.fabric;
-    const clone = document.createElement('canvas');
-    clone.width = canvas.width;
-    clone.height = canvas.height;
+  // cloneCanvas() {
+  //   const clone = document.createElement('canvas');
+  //   clone.width = this.canvas.width;
+  //   clone.height = this.canvas.height;
     
-    // Add absolute positioning to ensure proper overlay
-    clone.style.position = 'absolute';
-    clone.style.top = '0';
-    clone.style.left = '0';
+  //   // Add absolute positioning to ensure proper overlay
+  //   clone.style.position = 'absolute';
+  //   clone.style.top = '0';
+  //   clone.style.left = '0';
     
-    // Insert before the fabric canvas element
-    canvas.wrapperEl.insertBefore(clone, canvas.getElement());
-    return clone;
-  }
+  //   // Insert into container
+  //   this.container.appendChild(clone);
+  //   return clone;
+  // }
 
   setZoom(zoom) {
-    const { width, height } = this.fabric;
+    const { width, height } = this.canvas;
     this.zoom = clamp(zoom, this.minZoom, this.maxZoom);
     this.dx = 0;
     this.dy = 0;
@@ -133,23 +104,13 @@ export class Map extends mix(Base).with(ModesMixin) {
   }
 
   getBounds() {
-    let minX = Infinity;
-    let maxX = -Infinity;
-    let minY = Infinity;
-    let maxY = -Infinity;
-
-    this.fabric.forEachObject(obj => {
-      const coords = obj.getBounds();
-
-      coords.forEach(point => {
-        minX = Math.min(minX, point.x);
-        maxX = Math.max(maxX, point.x);
-        minY = Math.min(minY, point.y);
-        maxY = Math.max(maxY, point.y);
-      });
-    });
-
-    return [new FabricLayersPoint(minX, minY), new FabricLayersPoint(maxX, maxY)];
+    // Return default bounds since we're not managing objects
+    const width = this.canvas.width;
+    const height = this.canvas.height;
+    return [
+      new FabricLayersPoint(-width/2, -height/2), 
+      new FabricLayersPoint(width/2, height/2)
+    ];
   }
 
   fitBounds(padding = 100) {
@@ -161,25 +122,8 @@ export class Map extends mix(Base).with(ModesMixin) {
     this.originY = -this.fabric.height / 2;
 
     const bounds = this.getBounds();
-
-    this.center.x = (bounds[0].x + bounds[1].x) / 2.0;
-    this.center.y = -(bounds[0].y + bounds[1].y) / 2.0;
-
-    const boundWidth = Math.abs(bounds[0].x - bounds[1].x) + padding;
-    const boundHeight = Math.abs(bounds[0].y - bounds[1].y) + padding;
-    const scaleX = width / boundWidth;
-    const scaleY = height / boundHeight;
-
-    this.zoom = Math.min(scaleX, scaleY);
-
-    this.fabric.setZoom(this.zoom);
-
-    this.fabric.absolutePan({
-      x: this.originX + this.center.x * this.zoom,
-      y: this.originY - this.center.y * this.zoom
-    });
-
     this.update();
+
     setTimeout(() => {
       this.update();
     }, 0);
@@ -190,51 +134,39 @@ export class Map extends mix(Base).with(ModesMixin) {
   }
 
   reset() {
-    const { width, height } = this.fabric;
-    this.zoom = this._options.zoom || 1;
-    this.center = new FabricLayersPoint();
-    this.originX = -this.fabric.width / 2;
-    this.originY = -this.fabric.height / 2;
-    this.fabric.absolutePan({
-      x: this.originX,
-      y: this.originY
-    });
-    this.x = width / 2.0;
-    this.y = height / 2.0;
+    this.onResize();
+
+    this.originX = -this.canvas.width / 2;
+    this.originY = -this.canvas.height / 2;
+
     this.update();
+
     setTimeout(() => {
       this.update();
     }, 0);
   }
 
   onResize(width, height) {
-    const oldWidth = this.fabric.width;
-    const oldHeight = this.fabric.height;
+    const oldWidth = this.canvas.width;
+    const oldHeight = this.canvas.height;
 
     width = width || this.container.clientWidth;
     height = height || this.container.clientHeight;
 
-    this.fabric.setWidth(width);
-    this.fabric.setHeight(height);
+    this.canvas.width = width;
+    this.canvas.height = height;
 
     if (this.grid) {
       this.grid.setSize(width, height);
     }
 
-    const dx = width / 2.0 - oldWidth / 2.0;
-    const dy = height / 2.0 - oldHeight / 2.0;
-
-    this.fabric.relativePan({
-      x: dx,
-      y: dy
-    });
+    this.originX = -width / 2;
+    this.originY = -height / 2;
 
     this.update();
   }
 
   update() {
-    const canvas = this.fabric;
-
     if (this.grid) {
       this.grid.update2({
         x: this.center.x,
@@ -249,10 +181,7 @@ export class Map extends mix(Base).with(ModesMixin) {
       this.grid.render();
     }
 
-    // canvas.zoomToPoint(new Point(this.x, this.y), this.zoom);
-
     if (this.isGrabMode() || this.isRight) {
-      canvas.relativePan(new FabricLayersPoint(this.dx, this.dy));
       this.emit('panning');
       this.setCursor('grab');
     } else {
@@ -264,24 +193,10 @@ export class Map extends mix(Base).with(ModesMixin) {
       return;
     }
     this.lastUpdatedTime = now;
-
-    const objects = canvas.getObjects();
-    let hasKeepZoom = false;
-    for (let i = 0; i < objects.length; i += 1) {
-      const object = objects[i];
-      if (object.keepOnZoom) {
-        object.set('scaleX', 1.0 / this.zoom);
-        object.set('scaleY', 1.0 / this.zoom);
-        object.setCoords();
-        hasKeepZoom = true;
-        this.emit(`${object.class}scaling`, object);
-      }
-    }
-    if (hasKeepZoom) canvas.requestRenderAll();
   }
 
   panzoom(e) {
-    const { width, height } = this.fabric;
+    const { width, height } = this.canvas;
     const zoom = clamp(-e.dz, -height * 0.75, height * 0.75) / height;
 
     const prevZoom = 1 / this.zoom;
@@ -335,14 +250,7 @@ export class Map extends mix(Base).with(ModesMixin) {
     this.y = 0;
     view.y *= -1;
 
-    const dx = this.center.x - view.x;
-    const dy = -this.center.y + view.y;
-
     this.center.copy(view);
-
-    this.fabric.relativePan(new FabricLayersPoint(dx * this.zoom, dy * this.zoom));
-
-    this.fabric.renderAll();
 
     this.update();
 
@@ -382,8 +290,7 @@ export class Map extends mix(Base).with(ModesMixin) {
   }
 
   unregisterListeners() {
-    this.fabric.off('object:moving');
-    this.fabric.off('object:moved');
+    // No fabric events to unregister
   }
 
   // Marker functionality removed (not used in grid demo)

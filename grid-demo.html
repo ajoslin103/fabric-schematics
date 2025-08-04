@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>fabric-schematics Grid Demo</title>
+    <title>Grid Demo</title>
     <style>
         body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
         #canvas-container { border: 1px solid #ccc; margin: 20px 0; width: 800px; height: 600px; background: #f8f9fa; }
@@ -13,7 +13,7 @@
     </style>
 </head>
 <body>
-    <h1>fabric-schematics Grid Demo</h1>
+    <h1>Grid Demo</h1>
     <div class="controls">
         <label style="margin-right:10px;">
           Min Zoom: <input id="minZoomInput" type="number" step="0.01" value="0.05" style="width:70px;">
@@ -51,7 +51,7 @@
     <!-- Load EventEmitter2 from CDN -->
     <script src="https://cdn.jsdelivr.net/npm/eventemitter2@6.4.9/lib/eventemitter2.min.js"></script>
     
-    <!-- load fabric-schematics from local build with cache busting -->
+    <!-- load from local build with cache busting -->
     <script src="dist/index.umd.js?v=20250731195900"></script>
     
     <script>
@@ -85,27 +85,6 @@
           const { title, ...rest } = data;
           console.debug(title, rest);
         });
-        
-        // Add a circle and triangle to the fabric canvas
-        const circle = new fabric.Circle({
-          selectable: true,
-          radius: 30,
-          fill: 'red',
-          left: 100,
-          top: 100
-        });
-        
-        const triangle = new fabric.Triangle({
-          selectable: true,
-          width: 80,
-          height: 80,
-          fill: 'blue',
-          left: 200,
-          top: 100
-        });
-        
-        map.fabric.add(circle, triangle);
-        map.fabric.renderAll();
 
         // Show grid if not auto-enabled
         if (!map.grid) {
