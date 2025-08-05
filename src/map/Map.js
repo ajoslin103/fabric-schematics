@@ -29,8 +29,41 @@ export class Map extends Base {
     const stateOptions = { ...options, width, height };
     this.state = new MapState(stateOptions);
     
+    // For backward compatibility, mirror important properties directly on this object
+    // This avoids the need for getters/setters which can cause timing issues
+    this.center = this.state.center;
+    this.zoom = this.state.zoom;
+    this.minZoom = this.state.minZoom;
+    this.maxZoom = this.state.maxZoom;
+    this.originPin = this.state.originPin;
+    this.pinMargin = this.state.pinMargin;
+    this.zoomOverMouse = this.state.zoomOverMouse;
+    this.zoomEnabled = this.state.zoomEnabled;
+    this.originX = this.state.originX;
+    this.originY = this.state.originY;
+    this.dx = this.state.dx;
+    this.dy = this.state.dy;
+    this.x = this.state.x;
+    this.y = this.state.y;
+    this.isRight = this.state.isRight;
+    this.lastUpdatedTime = this.state.lastUpdatedTime;
+    this.mode = this.state.mode;
+    
     // Listen for state changes
     this.state.on('change', ({ newState }) => {
+      // Update mirrored properties
+      this.center = this.state.center;
+      this.zoom = this.state.zoom;
+      this.originX = this.state.originX;
+      this.originY = this.state.originY;
+      this.dx = this.state.dx;
+      this.dy = this.state.dy;
+      this.x = this.state.x;
+      this.y = this.state.y;
+      this.isRight = this.state.isRight;
+      this.lastUpdatedTime = this.state.lastUpdatedTime;
+      this.mode = this.state.mode;
+      
       this.update();
     });
     
@@ -48,7 +81,19 @@ export class Map extends Base {
   }
 
   addGrid() {
-    this.grid = new Grid(this.canvas, this);
+    // Create a compatible adapter for Grid
+    // The Grid expects specific properties directly on the object
+    const gridAdapter = {
+      canvas: this.canvas,
+      center: this.state.center,
+      zoom: this.state.zoom,
+      originPin: this.state.originPin,
+      pinMargin: this.state.pinMargin,
+      zoomOverMouse: this.state.zoomOverMouse,
+      zoomEnabled: this.state.zoomEnabled
+    };
+    
+    this.grid = new Grid(this.canvas, gridAdapter);
     
     // Set grid properties from state
     this.grid.setOriginPin(this.state.originPin);
@@ -74,8 +119,15 @@ export class Map extends Base {
   // }
 
   setZoom(zoom) {
+    this.zoom = zoom;
     this.state.setZoom(zoom);
+    
+    this.dx = 0;
+    this.dy = 0;
     this.state.setDeltas(0, 0);
+    
+    this.x = this.canvas.width / 2.0;
+    this.y = this.canvas.height / 2.0;
     this.state.setCoordinates(this.canvas.width / 2.0, this.canvas.height / 2.0);
     
     // Double update for immediate visual feedback
@@ -136,7 +188,17 @@ export class Map extends Base {
 
   update() {
     if (this.grid) {
-      this.grid.update2(this.state.getGridUpdateState());
+      // Ensure Grid has access to the latest state values it needs
+      this.grid.center = this.center;
+      this.grid.zoom = this.zoom;
+      this.grid.zoomEnabled = this.zoomEnabled;
+      
+      // Update the grid with current state
+      this.grid.update2({
+        x: this.center.x,
+        y: this.center.y,
+        zoom: this.zoom
+      });
     }
 
     this.emit('update', this);
@@ -145,7 +207,7 @@ export class Map extends Base {
       this.grid.render();
     }
 
-    if (this.state.isGrabMode() || this.state.isRight) {
+    if (this.isGrabMode() || this.isRight) {
       this.emit('panning');
       this.setCursor('grab');
     } else {
@@ -153,9 +215,10 @@ export class Map extends Base {
     }
 
     const now = Date.now();
-    if (this.state.lastUpdatedTime && Math.abs(this.state.lastUpdatedTime - now) < 100) {
+    if (this.lastUpdatedTime && Math.abs(this.lastUpdatedTime - now) < 100) {
       return;
     }
+    this.lastUpdatedTime = now;
     this.state.updateTimestamp();
   }
 
@@ -163,8 +226,17 @@ export class Map extends Base {
     // Update state using the panzoom event
     this.state.processPanzoom(e);
     
+    // Update mirrored properties
+    this.center = this.state.center;
+    this.zoom = this.state.zoom;
+    this.dx = this.state.dx;
+    this.dy = this.state.dy;
+    this.x = this.state.x;
+    this.y = this.state.y;
+    this.isRight = this.state.isRight;
+    
     // Update cursor based on interaction mode
-    if (this.state.isGrabMode() || e.isRight) {
+    if (this.isGrabMode() || e.isRight) {
       this.setCursor('grab');
     } else {
       this.setCursor('pointer');
@@ -172,12 +244,20 @@ export class Map extends Base {
   }
 
   setView(view) {
+    // Update state
     this.state.setDeltas(0, 0);
     this.state.setCoordinates(0, 0);
     
     // Flip Y coordinate to match the expected coordinate system
     const flippedView = new Point(view.x, -view.y);
     this.state.center.copy(flippedView);
+    
+    // Update mirrored properties
+    this.dx = 0;
+    this.dy = 0;
+    this.x = 0;
+    this.y = 0;
+    this.center = this.state.center;
     
     // Double update for immediate visual feedback
     setTimeout(() => {
@@ -186,6 +266,7 @@ export class Map extends Base {
   }
 
   setOriginPin(corner) {
+    this.originPin = corner;
     this.state.setOriginPin(corner);
     if (this.grid) {  
       this.grid.setOriginPin(corner);
@@ -193,6 +274,7 @@ export class Map extends Base {
   }
 
   setPinMargin(margin) {
+    this.pinMargin = margin;
     this.state.setPinMargin(margin);
     if (this.grid) {
       this.grid.setPinMargin(margin);
@@ -200,6 +282,7 @@ export class Map extends Base {
   }
 
   setZoomOverMouse(followMouse) {
+    this.zoomOverMouse = followMouse;
     this.state.setZoomOverMouse(followMouse);
     if (this.grid) {
       this.grid.setZoomOverMouse(followMouse);
@@ -221,6 +304,7 @@ export class Map extends Base {
   
   // Mode-related methods
   setMode(mode) {
+    this.mode = mode;
     this.state.setMode(mode);
   }
   
