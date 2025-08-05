@@ -1,55 +1,40 @@
 import panzoom from '../lib/panzoom'; // a smooth customer
-import { clamp } from '../lib/mumath/index';
 
 import Base from '../core/Base';
-import { MAP } from '../core/Constants';
 import Grid from '../grid/Grid';
 import { Point } from '../geometry/Point';
-import ModesMixin from './ModesMixin';
-import { mix } from '../lib/mix';
+import MapState from './MapState';
 
 import createEventSpy from '../utils/event-spy';
 const enableEventSpy = createEventSpy();
 
-export class Map extends mix(Base).with(ModesMixin) {
+export class Map extends Base {
   constructor(container, options) {
     super(options);
 
     enableEventSpy('map', this);
-
-    this.defaults = Object.assign({}, MAP);
     
-    // set defaults
-    Object.assign(this, this.defaults);
-
-    this.originPin = 'NONE';
-    this.pinMargin = 10;
-    this.zoomOverMouse = true;
-
-    // overwrite options
-    Object.assign(this, this._options);
-
-    this.center = new Point(this.center);
-
+    // Initialize container and canvas
     this.container = container || document.body;
-
     this.canvas = document.createElement('canvas');
     this.container.appendChild(this.canvas);
     this.canvas.setAttribute('id', 'schematics-canvas');
+    
+    const width = options?.width || this.container.clientWidth;
+    const height = options?.height || this.container.clientHeight;
+    this.canvas.width = width;
+    this.canvas.height = height;
 
-    this.canvas.width = this.width || this.container.clientWidth;
-    this.canvas.height = this.height || this.container.clientHeight;
-
-    // this.context = this.canvas.getContext('2d');
-
-    this.originX = -this.canvas.width / 2;
-    this.originY = -this.canvas.height / 2;
-
-    this.x = this.center.x;
-    this.y = this.center.y;
-    this.dx = 0;
-    this.dy = 0;
-
+    // Initialize state with canvas dimensions and options
+    const stateOptions = { ...options, width, height };
+    this.state = new MapState(stateOptions);
+    
+    // Listen for state changes
+    this.state.on('change', ({ newState }) => {
+      this.update();
+    });
+    
+    // Setup panzoom
     const vm = this;
     panzoom(this.container, e => {
       vm.panzoom(e);
@@ -63,14 +48,12 @@ export class Map extends mix(Base).with(ModesMixin) {
   }
 
   addGrid() {
-    // this.gridCanvas = this.cloneCanvas();
-    // this.gridCanvas.setAttribute('id', 'schematics-grid-canvas');
     this.grid = new Grid(this.canvas, this);
     
-    // Set grid properties from map settings
-    this.grid.setOriginPin(this.originPin);
-    this.grid.setPinMargin(this.pinMargin);
-    this.grid.setZoomOverMouse(this.zoomOverMouse);
+    // Set grid properties from state
+    this.grid.setOriginPin(this.state.originPin);
+    this.grid.setPinMargin(this.state.pinMargin);
+    this.grid.setZoomOverMouse(this.state.zoomOverMouse);
     
     this.grid.draw();
   }
@@ -91,39 +74,32 @@ export class Map extends mix(Base).with(ModesMixin) {
   // }
 
   setZoom(zoom) {
-    const { width, height } = this.canvas;
-    this.zoom = clamp(zoom, this.minZoom, this.maxZoom);
-    this.dx = 0;
-    this.dy = 0;
-    this.x = width / 2.0;
-    this.y = height / 2.0;
-    this.update();
+    this.state.setZoom(zoom);
+    this.state.setDeltas(0, 0);
+    this.state.setCoordinates(this.canvas.width / 2.0, this.canvas.height / 2.0);
+    
+    // Double update for immediate visual feedback
     setTimeout(() => {
       this.update();
     }, 0);
   }
 
   getBounds() {
-    // Return default bounds since we're not managing objects
-    const width = this.canvas.width;
-    const height = this.canvas.height;
-    return [
-      new Point(-width/2, -height/2), 
-      new Point(width/2, height/2)
-    ];
+    // Return bounds from state
+    return this.state.getBounds();
   }
 
   fitBounds(padding = 100) {
     this.onResize();
-
-    const { width, height } = this.fabric;
-
-    this.originX = -this.fabric.width / 2;
-    this.originY = -this.fabric.height / 2;
-
-    const bounds = this.getBounds();
-    this.update();
-
+    
+    // Note: this method seems to have a reference to this.fabric which doesn't exist
+    // in the original code. For now, we'll just use the canvas dimensions
+    const width = this.canvas.width;
+    const height = this.canvas.height;
+    
+    this.state.setOrigin(-width / 2, -height / 2);
+    
+    // Double update for immediate visual feedback
     setTimeout(() => {
       this.update();
     }, 0);
@@ -135,21 +111,15 @@ export class Map extends mix(Base).with(ModesMixin) {
 
   reset() {
     this.onResize();
-
-    this.originX = -this.canvas.width / 2;
-    this.originY = -this.canvas.height / 2;
-
-    this.update();
-
+    this.state.resetView();
+    
+    // Double update for immediate visual feedback
     setTimeout(() => {
       this.update();
     }, 0);
   }
 
   onResize(width, height) {
-    const oldWidth = this.canvas.width;
-    const oldHeight = this.canvas.height;
-
     width = width || this.container.clientWidth;
     height = height || this.container.clientHeight;
 
@@ -160,19 +130,13 @@ export class Map extends mix(Base).with(ModesMixin) {
       this.grid.setSize(width, height);
     }
 
-    this.originX = -width / 2;
-    this.originY = -height / 2;
-
-    this.update();
+    // Update state with new dimensions
+    this.state.setDimensions(width, height);
   }
 
   update() {
     if (this.grid) {
-      this.grid.update2({
-        x: this.center.x,
-        y: this.center.y,
-        zoom: this.zoom
-      });
+      this.grid.update2(this.state.getGridUpdateState());
     }
 
     this.emit('update', this);
@@ -181,7 +145,7 @@ export class Map extends mix(Base).with(ModesMixin) {
       this.grid.render();
     }
 
-    if (this.isGrabMode() || this.isRight) {
+    if (this.state.isGrabMode() || this.state.isRight) {
       this.emit('panning');
       this.setCursor('grab');
     } else {
@@ -189,92 +153,54 @@ export class Map extends mix(Base).with(ModesMixin) {
     }
 
     const now = Date.now();
-    if (!this.lastUpdatedTime && Math.abs(this.lastUpdatedTime - now) < 100) {
+    if (this.state.lastUpdatedTime && Math.abs(this.state.lastUpdatedTime - now) < 100) {
       return;
     }
-    this.lastUpdatedTime = now;
+    this.state.updateTimestamp();
   }
 
   panzoom(e) {
-    const { width, height } = this.canvas;
-    const zoom = clamp(-e.dz, -height * 0.75, height * 0.75) / height;
-
-    const prevZoom = 1 / this.zoom;
-    let curZoom = prevZoom * (1 - zoom);
-    curZoom = clamp(curZoom, this.minZoom, this.maxZoom);
-
-    let { x, y } = this.center;
-
-    // pan
-    const oX = 0.5;
-    const oY = 0.5;
-    if (this.isGrabMode() || e.isRight) {
-      x -= prevZoom * e.dx;
-      y += prevZoom * e.dy;
+    // Update state using the panzoom event
+    this.state.processPanzoom(e);
+    
+    // Update cursor based on interaction mode
+    if (this.state.isGrabMode() || e.isRight) {
       this.setCursor('grab');
     } else {
       this.setCursor('pointer');
     }
-
-    if (this.zoomEnabled) {
-      let tx, ty;
-      if (this.grid && this.grid.zoomOverMouse) {
-        // Zoom centered on mouse position
-        tx = e.x / width - oX;
-        ty = oY - e.y / height;
-      } else {
-        // Zoom centered on viewport center
-        tx = 0;
-        ty = 0;
-      }
-      x -= width * (curZoom - prevZoom) * tx;
-      y -= height * (curZoom - prevZoom) * ty;
-    }
-
-    this.center.setX(x);
-    this.center.setY(y);
-    this.zoom = 1 / curZoom;
-    this.dx = e.dx;
-    this.dy = e.dy;
-    this.x = e.x0;
-    this.y = e.y0;
-    this.isRight = e.isRight;
-
-    this.update();
   }
 
   setView(view) {
-    this.dx = 0;
-    this.dy = 0;
-    this.x = 0;
-    this.y = 0;
-    view.y *= -1;
-
-    this.center.copy(view);
-
-    this.update();
-
+    this.state.setDeltas(0, 0);
+    this.state.setCoordinates(0, 0);
+    
+    // Flip Y coordinate to match the expected coordinate system
+    const flippedView = new Point(view.x, -view.y);
+    this.state.center.copy(flippedView);
+    
+    // Double update for immediate visual feedback
     setTimeout(() => {
       this.update();
     }, 0);
   }
 
   setOriginPin(corner) {
-    this.originPin = corner;
+    this.state.setOriginPin(corner);
     if (this.grid) {  
       this.grid.setOriginPin(corner);
     }
   }
 
   setPinMargin(margin) {
-    this.pinMargin = margin;
+    this.state.setPinMargin(margin);
     if (this.grid) {
       this.grid.setPinMargin(margin);
     }
   }
 
   setZoomOverMouse(followMouse) {
-    this.zoomOverMouse = followMouse;
+    this.state.setZoomOverMouse(followMouse);
     if (this.grid) {
       this.grid.setZoomOverMouse(followMouse);
     }
@@ -291,6 +217,27 @@ export class Map extends mix(Base).with(ModesMixin) {
 
   unregisterListeners() {
     // No fabric events to unregister
+  }
+  
+  // Mode-related methods
+  setMode(mode) {
+    this.state.setMode(mode);
+  }
+  
+  setModeAsSelect() {
+    this.state.setModeAsSelect();
+  }
+  
+  setModeAsGrab() {
+    this.state.setModeAsGrab();
+  }
+  
+  isSelectMode() {
+    return this.state.isSelectMode();
+  }
+  
+  isGrabMode() {
+    return this.state.isGrabMode();
   }
 
   // Marker functionality removed (not used in grid demo)
