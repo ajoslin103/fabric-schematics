@@ -1,5 +1,6 @@
 
 import EventEmitter2 from 'eventemitter2';
+import { DEBUG } from './debug';
 
 const emitterNames = {};
 
@@ -14,19 +15,18 @@ export default function createEventSpy() {
   
   // Return the enable function
   return function enableEventSpy(name, named) {
-    return true;
-    
     // Only set it up once
-    if (enabled) return;
+    if (enabled) return true;
     emitterNames[named] = name;
     
     // Store original emit and replace it
     originalEmit = EventEmitter2.prototype.emit;
     EventEmitter2.prototype.emit = function(event, ...args) {
-      console.log('Event:', event, 'Source:', emitterNames[this]);
+      DEBUG.EVENTS.EMITTER && console.log('[EVENT_SPY] Event:', event, 'Source:', emitterNames[this]);
       return originalEmit.apply(this, [event, ...args]);
     };
     
+    DEBUG.EVENTS.GENERAL && console.log('[EVENT_SPY] Enabled for', name);
     enabled = true;
     return true;
   };

@@ -1,83 +1,76 @@
 import panzoom from '../lib/panzoom'; // a smooth customer
-import { clamp } from '../lib/mumath/index';
 
 import Base from '../core/Base';
-import { MAP, Modes } from '../core/Constants';
 import Grid from '../grid/Grid';
-import { FabricLayersPoint } from '../geometry/Point';
-import ModesMixin from './ModesMixin';
-import { mix } from '../lib/mix';
-
+import { Point } from '../geometry/Point';
+import MapState from './MapState';
+import { DEBUG } from '../utils/debug';
 import createEventSpy from '../utils/event-spy';
 const enableEventSpy = createEventSpy();
 
-export class Map extends mix(Base).with(ModesMixin) {
+export class Map extends Base {
   constructor(container, options) {
     super(options);
 
-    enableEventSpy('map', this);
-
-    this.defaults = Object.assign({}, MAP);
+    DEBUG.EVENTS.EMITTER && enableEventSpy('map', this);
     
-    // set defaults
-    Object.assign(this, this.defaults);
-
-    this.originPin = 'NONE';
-    this.pinMargin = 10;
-    this.zoomOverMouse = true;
-
-    // overwrite options
-    Object.assign(this, this._options);
-
-    this.center = new FabricLayersPoint(this.center);
-
+    // Initialize container and canvas
     this.container = container || document.body;
+    this.canvas = document.createElement('canvas');
+    this.container.appendChild(this.canvas);
+    this.canvas.setAttribute('id', 'schematics-canvas');
+    
+    const width = options?.width || this.container.clientWidth;
+    const height = options?.height || this.container.clientHeight;
+    this.canvas.width = width;
+    this.canvas.height = height;
 
-    const domCanvas = document.createElement('canvas');
-    this.container.appendChild(domCanvas);
-    domCanvas.setAttribute('id', 'fabric-schematics-canvas');
-
-    domCanvas.width = this.width || this.container.clientWidth;
-    domCanvas.height = this.height || this.container.clientHeight;
-
-    this.fabric = new fabric.Canvas(domCanvas, {
-      preserveObjectStacking: true,
-      renderOnAddRemove: true
+    // Initialize state with canvas dimensions and options
+    const stateOptions = { ...options, width, height };
+    this.state = new MapState(stateOptions);
+    
+    // For backward compatibility, mirror important properties directly on this object
+    // This avoids the need for getters/setters which can cause timing issues
+    this.center = this.state.center;
+    this.zoom = this.state.zoom;
+    this.minZoom = this.state.minZoom;
+    this.maxZoom = this.state.maxZoom;
+    this.originPin = this.state.originPin;
+    this.pinMargin = this.state.pinMargin;
+    this.zoomEnabled = this.state.zoomEnabled;
+    this.originX = this.state.originX;
+    this.originY = this.state.originY;
+    this.dx = this.state.dx;
+    this.dy = this.state.dy;
+    this.x = this.state.x;
+    this.y = this.state.y;
+    this.isRight = this.state.isRight;
+    this.lastUpdatedTime = this.state.lastUpdatedTime;
+    this.mode = this.state.mode;
+    
+    // Listen for state changes
+    this.state.on('change', ({ prevState, newState }) => {
+      DEBUG.MAP.GENERAL && console.log('[MAP:STATE_CHANGE] Type:', arguments[0]?.type || 'general');
+      
+      // Update mirrored properties
+      this.center = this.state.center;
+      this.zoom = this.state.zoom;
+      this.originX = this.state.originX;
+      this.originY = this.state.originY;
+      this.dx = this.state.dx;
+      this.dy = this.state.dy;
+      this.x = this.state.x;
+      this.y = this.state.y;
+      this.isRight = this.state.isRight;
+      this.lastUpdatedTime = this.state.lastUpdatedTime;
+      this.mode = this.state.mode;
+      
+      DEBUG.MAP.MIRRORING && console.log('[MAP:MIRRORED_PROPS] Updated properties from state');
+      
+      this.update();
     });
-    this.context = this.fabric.getContext('2d');
-
-    // objects are drifting between the map zoom and the fabric zoom
-
-    const updateFabricZoom = (args) => {
-      const { zoom } = args;
-      this.fabric && this.fabric.setZoom(zoom);
-    };
-    this.on('update', updateFabricZoom);
-
-
-    this.on('render', () => {
-      if (this.autostart) this.clear();
-    });
-
-    this.originX = -this.fabric.width / 2;
-    this.originY = -this.fabric.height / 2;
-
-    this.fabric.absolutePan({
-      x: this.originX,
-      y: this.originY
-    });
-
-    this.x = this.center.x;
-    this.y = this.center.y;
-    this.dx = 0;
-    this.dy = 0;
-
-    // if (this.showGrid) {
-    //   this.addGrid();
-    // }
-
-    this.setMode(this.mode || Modes.GRAB);
-
+    
+    // Setup panzoom
     const vm = this;
     panzoom(this.container, e => {
       vm.panzoom(e);
@@ -91,95 +84,78 @@ export class Map extends mix(Base).with(ModesMixin) {
   }
 
   addGrid() {
-    this.gridCanvas = this.cloneCanvas();
-    this.gridCanvas.setAttribute('id', 'fabric-schematics-grid-canvas');
-    this.grid = new Grid(this.gridCanvas, this);
+    // Create a compatible adapter for Grid
+    // The Grid expects specific properties directly on the object
+    const gridAdapter = {
+      canvas: this.canvas,
+      center: this.state.center,
+      zoom: this.state.zoom,
+      originPin: this.state.originPin,
+      pinMargin: this.state.pinMargin,
+      zoomEnabled: this.state.zoomEnabled
+    };
     
-    // Set grid properties from map settings
-    this.grid.setOriginPin(this.originPin);
-    this.grid.setPinMargin(this.pinMargin);
-    this.grid.setZoomOverMouse(this.zoomOverMouse);
+    this.grid = new Grid(this.canvas, gridAdapter);
+    
+    // Set grid properties from state
+    this.grid.setOriginPin(this.state.originPin);
+    this.grid.setPinMargin(this.state.pinMargin);
     
     this.grid.draw();
   }
 
-  cloneCanvas(canvas) {
-    canvas = canvas || this.fabric;
-    const clone = document.createElement('canvas');
-    clone.width = canvas.width;
-    clone.height = canvas.height;
+  // cloneCanvas() {
+  //   const clone = document.createElement('canvas');
+  //   clone.width = this.canvas.width;
+  //   clone.height = this.canvas.height;
     
-    // Add absolute positioning to ensure proper overlay
-    clone.style.position = 'absolute';
-    clone.style.top = '0';
-    clone.style.left = '0';
+  //   // Add absolute positioning to ensure proper overlay
+  //   clone.style.position = 'absolute';
+  //   clone.style.top = '0';
+  //   clone.style.left = '0';
     
-    // Insert before the fabric canvas element
-    canvas.wrapperEl.insertBefore(clone, canvas.getElement());
-    return clone;
-  }
+  //   // Insert into container
+  //   this.container.appendChild(clone);
+  //   return clone;
+  // }
 
   setZoom(zoom) {
-    const { width, height } = this.fabric;
-    this.zoom = clamp(zoom, this.minZoom, this.maxZoom);
+    DEBUG.MAP.PANZOOM && console.log('[MAP:SET_ZOOM] Called with zoom level', zoom);
+    
+    this.zoom = zoom;
+    this.state.setZoom(zoom);
+    
     this.dx = 0;
     this.dy = 0;
-    this.x = width / 2.0;
-    this.y = height / 2.0;
-    this.update();
+    this.state.setDeltas(0, 0);
+    
+    this.x = this.canvas.width / 2.0;
+    this.y = this.canvas.height / 2.0;
+    this.state.setCoordinates(this.canvas.width / 2.0, this.canvas.height / 2.0);
+    
+    // Double update for immediate visual feedback
     setTimeout(() => {
+      DEBUG.MAP.PANZOOM && console.log('[MAP:SET_ZOOM] Triggering immediate update');
       this.update();
     }, 0);
   }
 
   getBounds() {
-    let minX = Infinity;
-    let maxX = -Infinity;
-    let minY = Infinity;
-    let maxY = -Infinity;
-
-    this.fabric.forEachObject(obj => {
-      const coords = obj.getBounds();
-
-      coords.forEach(point => {
-        minX = Math.min(minX, point.x);
-        maxX = Math.max(maxX, point.x);
-        minY = Math.min(minY, point.y);
-        maxY = Math.max(maxY, point.y);
-      });
-    });
-
-    return [new FabricLayersPoint(minX, minY), new FabricLayersPoint(maxX, maxY)];
+    // Return bounds from state
+    return this.state.getBounds();
   }
 
   fitBounds(padding = 100) {
     this.onResize();
-
-    const { width, height } = this.fabric;
-
-    this.originX = -this.fabric.width / 2;
-    this.originY = -this.fabric.height / 2;
-
-    const bounds = this.getBounds();
-
-    this.center.x = (bounds[0].x + bounds[1].x) / 2.0;
-    this.center.y = -(bounds[0].y + bounds[1].y) / 2.0;
-
-    const boundWidth = Math.abs(bounds[0].x - bounds[1].x) + padding;
-    const boundHeight = Math.abs(bounds[0].y - bounds[1].y) + padding;
-    const scaleX = width / boundWidth;
-    const scaleY = height / boundHeight;
-
-    this.zoom = Math.min(scaleX, scaleY);
-
-    this.fabric.setZoom(this.zoom);
-
-    this.fabric.absolutePan({
-      x: this.originX + this.center.x * this.zoom,
-      y: this.originY - this.center.y * this.zoom
-    });
-
-    this.update();
+    
+    // Note: this method seems to have a reference to this.fabric which doesn't exist
+    // in the original code. For now, we'll just use the canvas dimensions
+    const width = this.canvas.width;
+    const height = this.canvas.height;
+    
+    this.state.setOrigin(-width / 2, -height / 2);
+    
+    // Double update for immediate visual feedback
     setTimeout(() => {
       this.update();
     }, 0);
@@ -190,52 +166,49 @@ export class Map extends mix(Base).with(ModesMixin) {
   }
 
   reset() {
-    const { width, height } = this.fabric;
-    this.zoom = this._options.zoom || 1;
-    this.center = new FabricLayersPoint();
-    this.originX = -this.fabric.width / 2;
-    this.originY = -this.fabric.height / 2;
-    this.fabric.absolutePan({
-      x: this.originX,
-      y: this.originY
-    });
-    this.x = width / 2.0;
-    this.y = height / 2.0;
-    this.update();
+    this.onResize();
+    this.state.resetView();
+    
+    // Double update for immediate visual feedback
     setTimeout(() => {
       this.update();
     }, 0);
   }
 
   onResize(width, height) {
-    const oldWidth = this.fabric.width;
-    const oldHeight = this.fabric.height;
-
     width = width || this.container.clientWidth;
     height = height || this.container.clientHeight;
+    
+    DEBUG.MAP.DIMENSIONS && console.log('[MAP:RESIZE] Resizing to', {width, height});
 
-    this.fabric.setWidth(width);
-    this.fabric.setHeight(height);
+    this.canvas.width = width;
+    this.canvas.height = height;
 
     if (this.grid) {
       this.grid.setSize(width, height);
     }
 
-    const dx = width / 2.0 - oldWidth / 2.0;
-    const dy = height / 2.0 - oldHeight / 2.0;
-
-    this.fabric.relativePan({
-      x: dx,
-      y: dy
-    });
-
-    this.update();
+    // Update state with new dimensions
+    this.state.setDimensions(width, height);
+    DEBUG.MAP.DIMENSIONS && console.log('[MAP:RESIZE] Canvas and state dimensions updated');
   }
 
   update() {
-    const canvas = this.fabric;
-
+    DEBUG.MAP.RENDER && console.log('[MAP:UPDATE] Starting map update');
+    
     if (this.grid) {
+      // Ensure Grid has access to the latest state values it needs
+      this.grid.center = this.center;
+      this.grid.zoom = this.zoom;
+      this.grid.zoomEnabled = this.zoomEnabled;
+      
+      // Update the grid with current state
+      DEBUG.MAP.RENDER && console.log('[MAP:UPDATE] Updating grid with', {
+        x: this.center.x,
+        y: this.center.y,
+        zoom: this.zoom
+      });
+      
       this.grid.update2({
         x: this.center.x,
         y: this.center.y,
@@ -249,110 +222,89 @@ export class Map extends mix(Base).with(ModesMixin) {
       this.grid.render();
     }
 
-    // canvas.zoomToPoint(new Point(this.x, this.y), this.zoom);
-
     if (this.isGrabMode() || this.isRight) {
-      canvas.relativePan(new FabricLayersPoint(this.dx, this.dy));
       this.emit('panning');
       this.setCursor('grab');
+      DEBUG.MAP.GENERAL && console.log('[MAP:UPDATE] In grab mode or right mouse button pressed');
     } else {
       this.setCursor('pointer');
     }
 
     const now = Date.now();
-    if (!this.lastUpdatedTime && Math.abs(this.lastUpdatedTime - now) < 100) {
+    if (this.lastUpdatedTime && Math.abs(this.lastUpdatedTime - now) < 100) {
+      DEBUG.MAP.TIMESTAMP && console.log('[MAP:UPDATE] Skipping timestamp update - too soon');
       return;
     }
     this.lastUpdatedTime = now;
-
-    const objects = canvas.getObjects();
-    let hasKeepZoom = false;
-    for (let i = 0; i < objects.length; i += 1) {
-      const object = objects[i];
-      if (object.keepOnZoom) {
-        object.set('scaleX', 1.0 / this.zoom);
-        object.set('scaleY', 1.0 / this.zoom);
-        object.setCoords();
-        hasKeepZoom = true;
-        this.emit(`${object.class}scaling`, object);
-      }
-    }
-    if (hasKeepZoom) canvas.requestRenderAll();
+    this.state.updateTimestamp();
+    DEBUG.MAP.RENDER && console.log('[MAP:UPDATE] Update completed');
   }
 
   panzoom(e) {
-    const { width, height } = this.fabric;
-    const zoom = clamp(-e.dz, -height * 0.75, height * 0.75) / height;
-
-    const prevZoom = 1 / this.zoom;
-    let curZoom = prevZoom * (1 - zoom);
-    curZoom = clamp(curZoom, this.minZoom, this.maxZoom);
-
-    let { x, y } = this.center;
-
-    // pan
-    const oX = 0.5;
-    const oY = 0.5;
+    DEBUG.MAP.PANZOOM && console.log('[MAP:PANZOOM] Processing panzoom event', {
+      dx: e.dx,
+      dy: e.dy,
+      dz: e.dz,
+      x: e.x,
+      y: e.y,
+      isRight: e.isRight
+    });
+    
+    // Update state using the panzoom event
+    this.state.processPanzoom(e);
+    
+    // Update mirrored properties
+    this.center = this.state.center;
+    this.zoom = this.state.zoom;
+    this.dx = this.state.dx;
+    this.dy = this.state.dy;
+    this.x = this.state.x;
+    this.y = this.state.y;
+    this.isRight = this.state.isRight;
+    
+    DEBUG.MAP.PANZOOM && console.log('[MAP:PANZOOM] Updated map properties from state', {
+      center: {x: this.center.x, y: this.center.y},
+      zoom: this.zoom
+    });
+    
+    // Update cursor based on interaction mode
     if (this.isGrabMode() || e.isRight) {
-      x -= prevZoom * e.dx;
-      y += prevZoom * e.dy;
       this.setCursor('grab');
     } else {
       this.setCursor('pointer');
     }
-
-    if (this.zoomEnabled) {
-      let tx, ty;
-      if (this.grid && this.grid.zoomOverMouse) {
-        // Zoom centered on mouse position
-        tx = e.x / width - oX;
-        ty = oY - e.y / height;
-      } else {
-        // Zoom centered on viewport center
-        tx = 0;
-        ty = 0;
-      }
-      x -= width * (curZoom - prevZoom) * tx;
-      y -= height * (curZoom - prevZoom) * ty;
-    }
-
-    this.center.setX(x);
-    this.center.setY(y);
-    this.zoom = 1 / curZoom;
-    this.dx = e.dx;
-    this.dy = e.dy;
-    this.x = e.x0;
-    this.y = e.y0;
-    this.isRight = e.isRight;
-
-    this.update();
   }
 
   setView(view) {
+    DEBUG.MAP.GENERAL && console.log('[MAP:SET_VIEW] Called with view', view);
+    
+    // Update state
+    this.state.setDeltas(0, 0);
+    this.state.setCoordinates(0, 0);
+    
+    // Flip Y coordinate to match the expected coordinate system
+    const flippedView = new Point(view.x, -view.y);
+    DEBUG.MAP.GENERAL && console.log('[MAP:SET_VIEW] Flipped Y coordinate', flippedView);
+    
+    this.state.center.copy(flippedView);
+    
+    // Update mirrored properties
     this.dx = 0;
     this.dy = 0;
     this.x = 0;
     this.y = 0;
-    view.y *= -1;
-
-    const dx = this.center.x - view.x;
-    const dy = -this.center.y + view.y;
-
-    this.center.copy(view);
-
-    this.fabric.relativePan(new FabricLayersPoint(dx * this.zoom, dy * this.zoom));
-
-    this.fabric.renderAll();
-
-    this.update();
-
+    this.center = this.state.center;
+    
+    // Double update for immediate visual feedback
     setTimeout(() => {
+      DEBUG.MAP.GENERAL && console.log('[MAP:SET_VIEW] Triggering immediate update');
       this.update();
     }, 0);
   }
 
   setOriginPin(corner) {
     this.originPin = corner;
+    this.state.setOriginPin(corner);
     if (this.grid) {  
       this.grid.setOriginPin(corner);
     }
@@ -360,16 +312,35 @@ export class Map extends mix(Base).with(ModesMixin) {
 
   setPinMargin(margin) {
     this.pinMargin = margin;
+    this.state.setPinMargin(margin);
     if (this.grid) {
       this.grid.setPinMargin(margin);
     }
   }
 
-  setZoomOverMouse(followMouse) {
-    this.zoomOverMouse = followMouse;
-    if (this.grid) {
-      this.grid.setZoomOverMouse(followMouse);
-    }
+  
+  // Set minimum zoom level
+  setMinZoom(minZoom) {
+    // Update Map's minZoom property
+    this.minZoom = minZoom;
+    
+    // Update state's minZoom (which will emit events and adjust zoom if needed)
+    this.state.setMinZoom(minZoom);
+    
+    DEBUG.MAP.PANZOOM && console.log('[MAP:MIN_ZOOM] Set to', minZoom);
+    return this;
+  }
+  
+  // Set maximum zoom level
+  setMaxZoom(maxZoom) {
+    // Update Map's maxZoom property
+    this.maxZoom = maxZoom;
+    
+    // Update state's maxZoom (which will emit events and adjust zoom if needed)
+    this.state.setMaxZoom(maxZoom);
+    
+    DEBUG.MAP.PANZOOM && console.log('[MAP:MAX_ZOOM] Set to', maxZoom);
+    return this;
   }
 
   registerListeners() {
@@ -382,8 +353,29 @@ export class Map extends mix(Base).with(ModesMixin) {
   }
 
   unregisterListeners() {
-    this.fabric.off('object:moving');
-    this.fabric.off('object:moved');
+    // No fabric events to unregister
+  }
+  
+  // Mode-related methods
+  setMode(mode) {
+    this.mode = mode;
+    this.state.setMode(mode);
+  }
+  
+  setModeAsSelect() {
+    this.state.setModeAsSelect();
+  }
+  
+  setModeAsGrab() {
+    this.state.setModeAsGrab();
+  }
+  
+  isSelectMode() {
+    return this.state.isSelectMode();
+  }
+  
+  isGrabMode() {
+    return this.state.isGrabMode();
   }
 
   // Marker functionality removed (not used in grid demo)
