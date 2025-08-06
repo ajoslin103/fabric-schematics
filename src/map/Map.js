@@ -336,7 +336,7 @@ export class Map extends Base {
     // Update state's minZoom (which will emit events and adjust zoom if needed)
     this.state.setMinZoom(minZoom);
     
-    DEBUG.MAP.PANZOOM && console.log('[MAP:MIN_ZOOM] Set to', minZoom);
+    console.log('[MAP:MIN_ZOOM] Set to', minZoom);
     return this;
   }
   
@@ -348,7 +348,7 @@ export class Map extends Base {
     // Update state's maxZoom (which will emit events and adjust zoom if needed)
     this.state.setMaxZoom(maxZoom);
     
-    DEBUG.MAP.PANZOOM && console.log('[MAP:MAX_ZOOM] Set to', maxZoom);
+    console.log('[MAP:MAX_ZOOM] Set to', maxZoom);
     return this;
   }
 

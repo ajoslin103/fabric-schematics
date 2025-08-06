@@ -72,7 +72,7 @@ class MapState extends EventEmitter2 {
         this.zoom = this.minZoom;
       }
       
-      DEBUG.STATE.PANZOOM && console.log('[STATE:MIN_ZOOM] Changed from', prevMinZoom, 'to', this.minZoom);
+      console.log('[STATE:MIN_ZOOM] Changed from', prevMinZoom, 'to', this.minZoom);
       this.emit('change:minZoom', { prevState, newState: this });
       this.emit('change', { prevState, newState: this });
     }
@@ -91,7 +91,7 @@ class MapState extends EventEmitter2 {
         this.zoom = this.maxZoom;
       }
       
-      DEBUG.STATE.PANZOOM && console.log('[STATE:MAX_ZOOM] Changed from', prevMaxZoom, 'to', this.maxZoom);
+      console.log('[STATE:MAX_ZOOM] Changed from', prevMaxZoom, 'to', this.maxZoom);
       this.emit('change:maxZoom', { prevState, newState: this });
       this.emit('change', { prevState, newState: this });
     }

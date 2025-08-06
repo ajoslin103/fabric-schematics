@@ -119,6 +119,7 @@
           
           // Use the proper methods to update minZoom and maxZoom in both map and state
           if (typeof map.setMinZoom === 'function') {
+            console.log('Min zoom change:', min);
             map.setMinZoom(min);
           } else {
             console.warn('setMinZoom method not available, falling back to direct property');
@@ -126,6 +127,7 @@
           }
           
           if (typeof map.setMaxZoom === 'function') {
+            console.log('Max zoom change:', max);
             map.setMaxZoom(max);
           } else {
             console.warn('setMaxZoom method not available, falling back to direct property');
