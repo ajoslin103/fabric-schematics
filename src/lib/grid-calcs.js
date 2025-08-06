@@ -68,14 +68,13 @@ export function calculateCoordinateState(coord, shape) {
   
   // Calculate style
   state.axisColor = typeof coord.axisColor === 'number'
-    ? alpha(coord.color, coord.axisColor)
-    : coord.axisColor || coord.color;
+    ? alpha(coord.labelColor, coord.axisColor)
+    : coord.axisColor || coord.labelColor;
   
   state.axisWidth = coord.axisWidth || coord.lineWidth;
   state.lineWidth = coord.lineWidth;
   state.tickAlign = coord.tickAlign;
-  state.color = coord.color;
-  state.labelColor = coord.labelColor || coord.color;
+  state.labelColor = coord.labelColor;
   
   // Get padding
   if (typeof coord.padding === 'number') {
@@ -110,9 +109,9 @@ export function calculateCoordinateState(coord, shape) {
   } else if (Array.isArray(coord.lineColor)) {
     state.lineColors = coord.lineColor;
   } else {
-    let color = alpha(coord.color, coord.lineColor);
+    let color = alpha(coord.lineColor, 1);
     if (typeof coord.lineColor !== 'number') {
-      color = coord.lineColor === false || coord.lineColor == null ? null : coord.color;
+      color = coord.lineColor === false || coord.lineColor == null ? null : coord.lineColor;
     }
     state.lineColors = Array(lines.length).fill(color);
   }

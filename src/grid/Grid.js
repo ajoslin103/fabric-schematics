@@ -185,7 +185,6 @@ class Grid extends Base {
         fontSize: '11pt',
         fontFamily: 'serif',
         padding: 0,
-        color: 'rgb(0,0,255,1)',
         labelColor: 'rgb(0,0,255,1)',
 
         // lines params
