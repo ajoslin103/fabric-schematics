@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.23](https://github.com/ajoslin103/fabric-schematics/compare/v1.1.22...v1.1.23) (2025-08-06)
+
 ### [1.1.22](https://github.com/ajoslin103/fabric-schematics/compare/v1.1.21...v1.1.22) (2025-08-06)
 
 ### [1.1.21](https://github.com/ajoslin103/https:/compare/v1.1.19...v1.1.21) (2025-08-06)
