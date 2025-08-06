@@ -6,6 +6,7 @@ import {
 import gridStyle from './gridStyle';
 import Axis from './Axis';
 import { Point } from '../geometry/Point';
+import { DEBUG } from '../utils/debug';
 import {
   calculatePinnedX,
   calculatePinnedY,
@@ -34,6 +35,11 @@ class Grid extends Base {
     this.context = this.canvas.getContext('2d');
     this.state = {};
     this.setDefaults();
+    
+    // Store a reference to the map's style if available
+    this.mapStyle = opts && opts.state && opts.state.style ? opts.state.style : null;
+    DEBUG.GRID.GENERAL && console.log('[GRID:INIT] Initializing with map style:', this.mapStyle);
+    
     this.update(opts);
   }
 
@@ -112,6 +118,13 @@ class Grid extends Base {
     
     const shape = [this.canvas.width, this.canvas.height];
     Object.assign(this.center, updatedCenter);
+    
+    // Update map style if available
+    if (center && center.state && center.state.style) {
+      this.mapStyle = center.state.style;
+      DEBUG.GRID.GENERAL && console.log('[GRID:UPDATE] Updated map style:', this.mapStyle);
+      this.updateStyleFromMap();
+    }
     
     // recalc state
     this.state.x = this.calcCoordinate(this.axisX, shape, this);
