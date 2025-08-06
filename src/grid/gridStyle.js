@@ -19,8 +19,8 @@ const gridStyle = {
     if (!state.lines) return;
     const coord = state.coordinate;
 
-    const light = alpha(coord.color, 0.1);
-    const heavy = alpha(coord.color, 0.3);
+    const light = alpha('rgb(0, 0, 255)', 0.1);
+    const heavy = alpha('rgb(0, 0, 255)', 0.3);
 
     const step = state.step;
     const power = Math.ceil(lg(step));

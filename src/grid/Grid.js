@@ -5,22 +5,41 @@ import {
 } from '../lib/mumath/index';
 import gridStyle from './gridStyle';
 import Axis from './Axis';
-import { FabricLayersPoint } from '../geometry/Point';
+import { Point } from '../geometry/Point';
+import { DEBUG } from '../utils/debug';
+import {
+  calculatePinnedX,
+  calculatePinnedY,
+  calculateCenterCoords,
+  calculateCoordinateState,
+  calculateNormalVectors,
+  calculateTickCoords,
+  calculateLabelPosition,
+  calculateAxisUpdates,
+  calculateAxisLineCoords,
+  adjustLabelPosition,
+  shouldSkipAxisLine
+} from '../lib/grid-calcs';
 
-import createEventSpy from '../utils/event-spy';
-const enableEventSpy = createEventSpy();
+// import createEventSpy from '../utils/event-spy';
+// const enableEventSpy = createEventSpy();
     
 // constructor
 class Grid extends Base {
   constructor(canvas, opts) {
     super(opts);
     
-    enableEventSpy('grid', this);
+    // enableEventSpy('grid', this);
 
     this.canvas = canvas;
     this.context = this.canvas.getContext('2d');
     this.state = {};
     this.setDefaults();
+    
+    // Store a reference to the map's style if available
+    this.mapStyle = opts && opts.state && opts.state.style ? opts.state.style : null;
+    DEBUG.GRID.GENERAL && console.log('[GRID:INIT] Initializing with map style:', this.mapStyle);
+    
     this.update(opts);
   }
 
@@ -36,29 +55,15 @@ class Grid extends Base {
     this.emit('pinmargin:change', margin);
   }
 
-  setZoomOverMouse(followMouse) {
-    this.zoomOverMouse = followMouse;
-    this.emit('zoomovermouse:change', followMouse);
-  }
 
   getPinnedX() {
     const { width } = this.canvas;
-    const effectiveWidth = width / this.center.zoom;
-    const scaledMargin = this.pinMargin / this.center.zoom;
-    if (this.pinnedCorner.includes('RIGHT')) {
-      return -((effectiveWidth/2) - scaledMargin);
-    }
-    return ((effectiveWidth/2) - scaledMargin);
+    return calculatePinnedX(width, this.center.zoom, this.pinMargin, this.pinnedCorner);
   }
 
   getPinnedY() {
     const { height } = this.canvas;
-    const effectiveHeight = height / this.center.zoom;
-    const scaledMargin = this.pinMargin / this.center.zoom;
-    if (this.pinnedCorner.includes('BOTTOM')) { 
-      return (effectiveHeight/2) - scaledMargin;
-    }
-    return -(effectiveHeight/2) + scaledMargin;
+    return calculatePinnedY(height, this.center.zoom, this.pinMargin, this.pinnedCorner);
   }
 
   render() {
@@ -67,20 +72,7 @@ class Grid extends Base {
   }
 
   getCenterCoords() {
-    let state = this.state.x;
-    let [width, height] = state.shape;
-    let [pt, pr, pb, pl] = state.padding;
-    let axisCoords = state.opposite.coordinate.getCoords(
-      [state.coordinate.axisOrigin],
-      state.opposite
-    );
-    const y = pt + axisCoords[1] * (height - pt - pb);
-    state = this.state.y;
-    [width, height] = state.shape;
-    [pt, pr, pb, pl] = state.padding;
-    axisCoords = state.opposite.coordinate.getCoords([state.coordinate.axisOrigin], state.opposite);
-    const x = pl + axisCoords[0] * (width - pr - pl);
-    return { x, y };
+    return calculateCenterCoords(this.state.x, this.state.y);
   }
 
   setSize(width, height) {
@@ -112,139 +104,47 @@ class Grid extends Base {
 
   // re-evaluate lines, calc options for renderer
   update2(center) {
-    if (this.isPinned) {
-      center.x = this.getPinnedX();
-      center.y = this.getPinnedY();
-    }
+    // Use pure function to calculate axis updates
+    const { updatedCenter, axisXOffset, axisYOffset, axisZoom } = calculateAxisUpdates(
+      center, 
+      this.isPinned, 
+      this.getPinnedX(), 
+      this.getPinnedY()
+    );
+    
     const shape = [this.canvas.width, this.canvas.height];
-    Object.assign(this.center, center);
+    Object.assign(this.center, updatedCenter);
+    
+    // Update map style if available
+    if (center && center.state && center.state.style) {
+      this.mapStyle = center.state.style;
+      DEBUG.GRID.GENERAL && console.log('[GRID:UPDATE] Updated map style:', this.mapStyle);
+      this.updateStyleFromMap();
+    }
+    
     // recalc state
     this.state.x = this.calcCoordinate(this.axisX, shape, this);
     this.state.y = this.calcCoordinate(this.axisY, shape, this);
     this.state.x.opposite = this.state.y;
     this.state.y.opposite = this.state.x;
-    this.emit('update', center);
+    this.emit('update', updatedCenter);
 
-    this.axisX.offset = center.x;
-    this.axisX.zoom = 1 / center.zoom;
+    // Apply the calculated axis parameters
+    this.axisX.offset = axisXOffset;
+    this.axisX.zoom = axisZoom;
 
-    this.axisY.offset = center.y;
-    this.axisY.zoom = 1 / center.zoom;
+    this.axisY.offset = axisYOffset;
+    this.axisY.zoom = axisZoom;
   }
 
   // get state object with calculated params, ready for rendering
   calcCoordinate(coord, shape) {
-    const state = {
-      coordinate: coord,
-      shape,
-      grid: this
-    };
-    // calculate real offset/range
-    state.range = coord.getRange(state);
-    state.offset = clamp(
-      coord.offset - state.range * clamp(0.5, 0, 1),
-      Math.max(coord.min, -Number.MAX_VALUE + 1),
-      Math.min(coord.max, Number.MAX_VALUE) - state.range
-    );
-
-    state.zoom = coord.zoom;
-    // calc style
-    state.axisColor = typeof coord.axisColor === 'number'
-      ? alpha(coord.color, coord.axisColor)
-      : coord.axisColor || coord.color;
-
-    state.axisWidth = coord.axisWidth || coord.lineWidth;
-    state.lineWidth = coord.lineWidth;
-    state.tickAlign = coord.tickAlign;
-    state.labelColor = state.color;
-    // get padding
-    if (typeof coord.padding === 'number') {
-      state.padding = Array(4).fill(coord.padding);
-    } else if (coord.padding instanceof Function) {
-      state.padding = coord.padding(state);
-    } else {
-      state.padding = coord.padding;
-    }
-    // calc font
-    if (typeof coord.fontSize === 'number') {
-      state.fontSize = coord.fontSize;
-    } else {
-      const units = parseUnit(coord.fontSize);
-      state.fontSize = units[0] * toPx(units[1]);
-    }
-    state.fontFamily = coord.fontFamily || 'sans-serif';
-    // get lines stops, including joined list of values
-    let lines;
-    if (coord.lines instanceof Function) {
-      lines = coord.lines(state);
-    } else {
-      lines = coord.lines || [];
-    }
-    state.lines = lines;
-    // calc colors
-    if (coord.lineColor instanceof Function) {
-      state.lineColors = coord.lineColor(state);
-    } else if (Array.isArray(coord.lineColor)) {
-      state.lineColors = coord.lineColor;
-    } else {
-      let color = alpha(coord.color, coord.lineColor);
-      if (typeof coord.lineColor !== 'number') {
-        color = coord.lineColor === false || coord.lineColor == null ? null : coord.color;
-      }
-      state.lineColors = Array(lines.length).fill(color);
-    }
-    // calc ticks
-    let ticks;
-    if (coord.ticks instanceof Function) {
-      ticks = coord.ticks(state);
-    } else if (Array.isArray(coord.ticks)) {
-      ticks = coord.ticks;
-    } else {
-      const tick = coord.ticks === true || coord.ticks === true
-        ? state.axisWidth * 2 : coord.ticks || 0;
-      ticks = Array(lines.length).fill(tick);
-    }
-    state.ticks = ticks;
-    // calc labels
-    let labels;
-    if (coord.labels === true) labels = state.lines;
-    else if (coord.labels instanceof Function) {
-      labels = coord.labels(state);
-    } else if (Array.isArray(coord.labels)) {
-      labels = coord.labels;
-    } else if (isObj(coord.labels)) {
-      labels = coord.labels;
-    } else {
-      labels = Array(state.lines.length).fill(null);
-    }
-    state.labels = labels;
-    // convert hashmap ticks/labels to lines + colors
-    if (isObj(ticks)) {
-      state.ticks = Array(lines.length).fill(0);
-    }
-    if (isObj(labels)) {
-      state.labels = Array(state.lines.length).fill(null);
-    }
-    if (isObj(ticks)) {
-      // eslint-disable-next-line guard-for-in
-      Object.keys(ticks).forEach((value, tick) => {
-        state.ticks.push(tick);
-        state.lines.push(parseFloat(value));
-        state.lineColors.push(null);
-        state.labels.push(null);
-      });
-    }
-
-    if (isObj(labels)) {
-      Object.keys(labels).forEach((label, value) => {
-        state.labels.push(label);
-        state.lines.push(parseFloat(value));
-        state.lineColors.push(null);
-        state.ticks.push(null);
-      });
-    }
-
-    return state;
+    const baseState = calculateCoordinateState(coord, shape);
+    
+    // Add grid reference needed for backward compatibility
+    baseState.grid = this;
+    
+    return baseState;
   }
 
   setDefaults() {
@@ -283,9 +183,9 @@ class Grid extends Base {
         // labels
         labels: true,
         fontSize: '11pt',
-        fontFamily: 'sans-serif',
+        fontFamily: 'serif',
         padding: 0,
-        color: 'rgb(0,0,0,1)',
+        labelColor: 'rgb(0,0,255,1)',
 
         // lines params
         lines: true,
@@ -294,13 +194,13 @@ class Grid extends Base {
         lineWidth: 1,
         distance: 13,
         style: 'lines',
-        lineColor: 0.4,
+        lineColor: 'rgba(0, 0, 255, 0.4)',
 
         // axis params
         axis: true,
         axisOrigin: 0,
         axisWidth: 2,
-        axisColor: 0.8,
+        axisColor: 'rgba(0, 0, 255, 0.8)',
 
         // stub methods
         // return coords for the values, redefined by axes
@@ -360,7 +260,7 @@ class Grid extends Base {
     Object.assign(this, this.defaults);
     Object.assign(this, this._options);
 
-    this.center = new FabricLayersPoint(this.center);
+    this.center = new Point(this.center);
   }
 
   // draw grid to the canvas
@@ -373,74 +273,75 @@ class Grid extends Base {
 
   // lines instance draw
   drawLines(state) {
-    // draw lines and sublines
-    if (!state || !state.coordinate) return;
-
+    if (!state || !state.coordinate || !state.lines || !state.lines.length) return;
+    
     const ctx = this.context;
     const [width, height] = state.shape;
+    const [pt, pr, pb, pl] = state.padding;
     const left = 0;
     const top = 0;
-    const [pt, pr, pb, pl] = state.padding;
+    
+    // Get axis ratio
+    let axisRatio = state.coordinate.axisRatio;
+    if (axisRatio === undefined && state.opposite && state.opposite.coordinate) {
+      axisRatio = state.opposite.coordinate.getRatio(state.coordinate.axisOrigin, state.opposite);
+      axisRatio = clamp(axisRatio, 0, 1);
+    }
 
-    let axisRatio = state.opposite.coordinate.getRatio(state.coordinate.axisOrigin, state.opposite);
-    axisRatio = clamp(axisRatio, 0, 1);
+    // Get all coordinates for lines
     const coords = state.coordinate.getCoords(state.lines, state);
-    // draw state.lines
-    ctx.lineWidth = 1; // state.lineWidth/2.;
+    state.coords = coords; // Store coords for later use
+
+    // Draw lines
+    ctx.lineWidth = state.lineWidth / 2;
+    
     for (let i = 0, j = 0; i < coords.length; i += 4, j += 1) {
+      // Use pure function to determine if line should be skipped
+      if (shouldSkipAxisLine(state.lines[j], state.opposite)) continue;
+
+      // apply line color
       const color = state.lineColors[j];
       if (!color) continue;
+      
       ctx.strokeStyle = color;
       ctx.beginPath();
-      const x1 = left + pl + coords[i] * (width - pr - pl);
-      const y1 = top + pt + coords[i + 1] * (height - pb - pt);
-      const x2 = left + pl + coords[i + 2] * (width - pr - pl);
-      const y2 = top + pt + coords[i + 3] * (height - pb - pt);
+      
+      const x1 = left + pl + coords[i] * (width - pl - pr);
+      const y1 = top + pt + coords[i + 1] * (height - pt - pb);
+      const x2 = left + pl + coords[i + 2] * (width - pl - pr);
+      const y2 = top + pt + coords[i + 3] * (height - pt - pb);
+
+      // draw path
       ctx.moveTo(x1, y1);
       ctx.lineTo(x2, y2);
       ctx.stroke();
       ctx.closePath();
     }
-    const normals = [];
-    for (let i = 0; i < coords.length; i += 4) {
-      const x1 = coords[i];
-      const y1 = coords[i + 1];
-      const x2 = coords[i + 2];
-      const y2 = coords[i + 3];
-      const xDif = x2 - x1;
-      const yDif = y2 - y1;
-      const dist = len(xDif, yDif);
-      normals.push(xDif / dist);
-      normals.push(yDif / dist);
-    }
-    // calc state.labels/tick coords
-    const tickCoords = [];
-    state.labelCoords = [];
-    const ticks = state.ticks;
-    for (let i = 0, j = 0, k = 0; i < normals.length; k += 1, i += 2, j += 4) {
-      const x1 = coords[j];
-      const y1 = coords[j + 1];
-      const x2 = coords[j + 2];
-      const y2 = coords[j + 3];
-      const xDif = (x2 - x1) * axisRatio;
-      const yDif = (y2 - y1) * axisRatio;
-      const tick = [
-        (normals[i] * ticks[k]) / (width - pl - pr),
-        (normals[i + 1] * ticks[k]) / (height - pt - pb)
-      ];
-      tickCoords.push(normals[i] * (xDif + tick[0] * state.tickAlign) + x1);
-      tickCoords.push(normals[i + 1] * (yDif + tick[1] * state.tickAlign) + y1);
-      tickCoords.push(normals[i] * (xDif - tick[0] * (1 - state.tickAlign)) + x1);
-      tickCoords.push(normals[i + 1] * (yDif - tick[1] * (1 - state.tickAlign)) + y1);
-      state.labelCoords.push(normals[i] * xDif + x1);
-      state.labelCoords.push(normals[i + 1] * yDif + y1);
-    }
+
+    // Calculate normal vectors for lines
+    const normals = calculateNormalVectors(coords);
+    
+    // Calculate tick coordinates
+    const { tickCoords, labelCoords } = calculateTickCoords(
+      coords, 
+      normals, 
+      state.ticks, 
+      width, 
+      height, 
+      state.padding, 
+      axisRatio, 
+      state.tickAlign
+    );
+    
+    state.labelCoords = labelCoords;
+    
     // draw ticks
-    if (ticks.length) {
+    if (state.ticks && state.ticks.length) {
       ctx.lineWidth = state.axisWidth / 2;
       ctx.beginPath();
       for (let i = 0, j = 0; i < tickCoords.length; i += 4, j += 1) {
-        if (almost(state.lines[j], state.opposite.coordinate.axisOrigin)) continue;
+        // Use pure function to determine if tick should be skipped
+        if (shouldSkipAxisLine(state.lines[j], state.opposite)) continue;
         const x1 = left + pl + tickCoords[i] * (width - pl - pr);
         const y1 = top + pt + tickCoords[i + 1] * (height - pt - pb);
         const x2 = left + pl + tickCoords[i + 2] * (width - pl - pr);
@@ -452,25 +353,37 @@ class Grid extends Base {
       ctx.stroke();
       ctx.closePath();
     }
+    
     // draw axis
-    if (state.coordinate.axis && state.axisColor) {
+    if (state.coordinate && state.coordinate.axis && state.axisColor && 
+        state.opposite && state.opposite.coordinate) {
       const axisCoords = state.opposite.coordinate.getCoords(
         [state.coordinate.axisOrigin],
         state.opposite
       );
-      ctx.lineWidth = state.axisWidth / 2;
-      const x1 = left + pl + clamp(axisCoords[0], 0, 1) * (width - pr - pl);
-      const y1 = top + pt + clamp(axisCoords[1], 0, 1) * (height - pt - pb);
-      const x2 = left + pl + clamp(axisCoords[2], 0, 1) * (width - pr - pl);
-      const y2 = top + pt + clamp(axisCoords[3], 0, 1) * (height - pt - pb);
-      ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x2, y2);
-      ctx.strokeStyle = state.axisColor;
-      ctx.stroke();
-      ctx.closePath();
+      
+      // Use pure function to calculate axis line coordinates
+      const lineCoords = calculateAxisLineCoords(
+        axisCoords, 
+        width, 
+        height, 
+        state.padding, 
+        left, 
+        top
+      );
+      
+      if (lineCoords) {
+        ctx.lineWidth = state.axisWidth / 2;
+        ctx.beginPath();
+        ctx.moveTo(lineCoords.x1, lineCoords.y1);
+        ctx.lineTo(lineCoords.x2, lineCoords.y2);
+        ctx.strokeStyle = state.axisColor;
+        ctx.stroke();
+        ctx.closePath();
+      }
     }
-    // draw state.labels
+    
+    // draw labels
     this.drawLabels(state);
   }
 
@@ -483,31 +396,49 @@ class Grid extends Base {
       ctx.font = `300 ${state.fontSize}px ${state.fontFamily}`;
       ctx.fillStyle = state.labelColor;
       ctx.textBaseline = 'top';
+      
       const textHeight = state.fontSize;
       const indent = state.axisWidth + 1.5;
-      const textOffset = state.tickAlign < 0.5
-        ? -textHeight - state.axisWidth * 2 : state.axisWidth * 2;
       const isOpp = state.coordinate.orientation === 'y' && !state.opposite.disabled;
+      
       for (let i = 0; i < state.labels.length; i += 1) {
         let label = state.labels[i];
         if (label == null) continue;
-
-        if (isOpp && almost(state.lines[i], state.opposite.coordinate.axisOrigin)) continue;
-
+        
+        // Use pure function to determine if label should be skipped
+        if (isOpp && shouldSkipAxisLine(state.lines[i], state.opposite)) continue;
+        
         const textWidth = ctx.measureText(label).width;
-
-        let textLeft = state.labelCoords[i * 2] * (width - pl - pr) + indent + pl;
-
-        if (state.coordinate.orientation === 'y') {
-          textLeft = clamp(textLeft, indent, width - textWidth - 1 - state.axisWidth);
-          label *= -1;
-        }
-
-        let textTop = state.labelCoords[i * 2 + 1] * (height - pt - pb) + textOffset + pt;
-        if (state.coordinate.orientation === 'x') {
-          textTop = clamp(textTop, 0, height - textHeight - textOffset);
-        }
-        ctx.fillText(label, textLeft, textTop);
+        
+        // Calculate position using pure function
+        const { textLeft, textTop } = calculateLabelPosition(
+          state.labelCoords, 
+          i, 
+          width, 
+          height, 
+          state.padding, 
+          state.tickAlign, 
+          state.fontSize, 
+          state.axisWidth, 
+          state.coordinate.orientation
+        );
+        
+        // Use pure function to adjust label position based on constraints
+        const { finalTextLeft, finalTextTop, displayLabel } = adjustLabelPosition(
+          textLeft,
+          textTop,
+          label,
+          state.coordinate.orientation,
+          width,
+          height,
+          textWidth,
+          textHeight,
+          indent,
+          state.axisWidth,
+          state.tickAlign
+        );
+        
+        ctx.fillText(displayLabel, finalTextLeft, finalTextTop);
       }
     }
   }
