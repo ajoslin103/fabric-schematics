@@ -37,7 +37,6 @@ export class Map extends Base {
     this.maxZoom = this.state.maxZoom;
     this.originPin = this.state.originPin;
     this.pinMargin = this.state.pinMargin;
-    this.zoomOverMouse = this.state.zoomOverMouse;
     this.zoomEnabled = this.state.zoomEnabled;
     this.originX = this.state.originX;
     this.originY = this.state.originY;
@@ -100,7 +99,6 @@ export class Map extends Base {
       zoom: this.state.zoom,
       originPin: this.state.originPin,
       pinMargin: this.state.pinMargin,
-      zoomOverMouse: this.state.zoomOverMouse,
       zoomEnabled: this.state.zoomEnabled
     };
     
@@ -109,7 +107,6 @@ export class Map extends Base {
     // Set grid properties from state
     this.grid.setOriginPin(this.state.originPin);
     this.grid.setPinMargin(this.state.pinMargin);
-    this.grid.setZoomOverMouse(this.state.zoomOverMouse);
     
     this.grid.draw();
   }
@@ -330,13 +327,6 @@ export class Map extends Base {
     }
   }
 
-  setZoomOverMouse(followMouse) {
-    this.zoomOverMouse = followMouse;
-    this.state.setZoomOverMouse(followMouse);
-    if (this.grid) {
-      this.grid.setZoomOverMouse(followMouse);
-    }
-  }
   
   // Set minimum zoom level
   setMinZoom(minZoom) {

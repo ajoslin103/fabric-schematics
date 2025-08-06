@@ -24,7 +24,6 @@ class MapState extends EventEmitter2 {
     this.showGrid = options.showGrid !== undefined ? options.showGrid : MAP.showGrid;
     this.originPin = options.originPin || MAP.originPin;
     this.pinMargin = options.pinMargin !== undefined ? options.pinMargin : 10;
-    this.zoomOverMouse = options.zoomOverMouse !== undefined ? options.zoomOverMouse : true;
     this.enablePan = options.enablePan !== undefined ? options.enablePan : MAP.enablePan;
     this.mode = options.mode || MAP.mode;
     
@@ -201,16 +200,6 @@ class MapState extends EventEmitter2 {
     return this;
   }
   
-  // Set zoom over mouse
-  setZoomOverMouse(followMouse) {
-    if (followMouse !== this.zoomOverMouse) {
-      const prevState = { ...this };
-      this.zoomOverMouse = followMouse;
-      this.emit('change:zoomOverMouse', { prevState, newState: this });
-      this.emit('change', { prevState, newState: this });
-    }
-    return this;
-  }
   
   // Update delta values
   setDeltas(dx, dy) {
@@ -287,16 +276,9 @@ class MapState extends EventEmitter2 {
     }
 
     if (this.zoomEnabled) {
-      let tx, ty;
-      if (this.zoomOverMouse) {
-        // Zoom centered on mouse position
-        tx = e.x / width - oX;
-        ty = oY - e.y / height;
-      } else {
-        // Zoom centered on viewport center
-        tx = 0;
-        ty = 0;
-      }
+      // Always zoom centered on viewport center
+      const tx = 0;
+      const ty = 0;
       x -= width * (curZoom - prevZoom) * tx;
       y -= height * (curZoom - prevZoom) * ty;
     }
@@ -376,7 +358,6 @@ class MapState extends EventEmitter2 {
       showGrid: this.showGrid,
       originPin: this.originPin,
       pinMargin: this.pinMargin,
-      zoomOverMouse: this.zoomOverMouse,
       enablePan: this.enablePan,
       mode: this.mode,
       center: { x: this.center.x, y: this.center.y },

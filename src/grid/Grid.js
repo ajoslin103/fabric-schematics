@@ -55,10 +55,6 @@ class Grid extends Base {
     this.emit('pinmargin:change', margin);
   }
 
-  setZoomOverMouse(followMouse) {
-    this.zoomOverMouse = followMouse;
-    this.emit('zoomovermouse:change', followMouse);
-  }
 
   getPinnedX() {
     const { width } = this.canvas;

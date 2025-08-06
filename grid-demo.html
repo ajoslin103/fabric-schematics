@@ -36,9 +36,6 @@
         <label style="margin-right:10px;">
           Pin Margin: <input id="pinMarginInput" type="number" step="1" value="10" style="width:70px;">
         </label>
-        <label style="margin-right:10px;">
-          <input id="zoomOverMouse" type="checkbox"> Zoom Follows Mouse
-        </label>
         <br><br>
         <span id="coordinates">X: 0, Y: 0</span>
         <span id="zoomLevel" style="margin-left: 20px; font-family: monospace;">Zoom: 1.00x</span>
@@ -99,7 +96,6 @@
         // Wire pin select & margin
         const pinSelect = document.getElementById('pinSelect');
         const pinMarginInput = document.getElementById('pinMarginInput');
-        const zoomOverMouseInput = document.getElementById('zoomOverMouse');
         pinSelect.addEventListener('change', function() {
           console.log('Pin set:', this.value); 
           map.setOriginPin(this.value);
@@ -107,10 +103,6 @@
         pinMarginInput.addEventListener('change', function() {
           console.log('Margin change:', this.value);
           map.setPinMargin(parseInt(this.value, 10));
-        });
-        zoomOverMouseInput.addEventListener('change', function() {
-          console.log('Zoom over mouse:', this.checked);
-          map.setZoomOverMouse(this.checked);
         });
         // Set initial margin & pin
         map.setPinMargin(parseInt(pinMarginInput.value, 10));
@@ -124,9 +116,24 @@
           let max = parseFloat(maxZoomInput.value);
           if (isNaN(min) || min <= 0) min = 0.01;
           if (isNaN(max) || max <= min) max = min + 0.01;
-          map.minZoom = min;
-          map.maxZoom = max;
-          // Clamp current zoom if needed
+          
+          // Use the proper methods to update minZoom and maxZoom in both map and state
+          if (typeof map.setMinZoom === 'function') {
+            map.setMinZoom(min);
+          } else {
+            console.warn('setMinZoom method not available, falling back to direct property');
+            map.minZoom = min;
+          }
+          
+          if (typeof map.setMaxZoom === 'function') {
+            map.setMaxZoom(max);
+          } else {
+            console.warn('setMaxZoom method not available, falling back to direct property');
+            map.maxZoom = max;
+          }
+          
+          // Clamp current zoom if needed - the setMinZoom/setMaxZoom methods should handle this
+          // but we'll keep this as a fallback
           if (map.zoom < min) map.setZoom(min);
           if (map.zoom > max) map.setZoom(max);
         }
