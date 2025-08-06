@@ -1,6 +1,6 @@
 {
   "name": "fabric-schematics",
-  "version": "1.1.23",
+  "version": "1.1.24",
   "description": "Schematic and diagram visualization components for fabric.js",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
