@@ -216,7 +216,7 @@ class MapState extends EventEmitter2 {
   updateTimestamp() {
     const prevTime = this.lastUpdatedTime;
     this.lastUpdatedTime = Date.now();
-    DEBUG.STATE.GENERAL && console.log('[STATE:TIMESTAMP] Updated from', prevTime, 'to', this.lastUpdatedTime);
+    DEBUG.STATE.TIMING && console.log('[STATE:TIMESTAMP] Updated from', prevTime, 'to', this.lastUpdatedTime);
     return this;
   }
   

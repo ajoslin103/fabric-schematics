@@ -8,6 +8,7 @@ export const DEBUG = {
   // Core state transitions and operations
   STATE: {
     GENERAL: true,      // General state operations
+    TIMING: false,       // Timestamp operations 
     PANZOOM: false,      // Pan and zoom state changes
     DIMENSIONS: false,   // Canvas dimension changes
     POSITION: false,     // Position and coordinate changes
@@ -16,17 +17,17 @@ export const DEBUG = {
 
   // Map component debugging
   MAP: {
-    GENERAL: true,      // General map operations
+    GENERAL: false,      // General map operations
     PANZOOM: false,      // Pan and zoom operations
     MIRRORING: false,    // State mirroring operations
-    RENDER: true,       // Rendering and updates
+    RENDER: false,       // Rendering and updates
     TIMESTAMP: false     // Timestamp-related operations
   },
 
   // Grid component debugging
   GRID: {
-    GENERAL: true,      // General grid operations
-    RENDER: true        // Grid rendering
+    GENERAL: false,      // General grid operations
+    RENDER: false        // Grid rendering
   },
 
   // Event system debugging
