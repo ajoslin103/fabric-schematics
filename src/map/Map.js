@@ -37,7 +37,6 @@ export class Map extends Base {
     this.maxZoom = this.state.maxZoom;
     this.originPin = this.state.originPin;
     this.pinMargin = this.state.pinMargin;
-    this.zoomOverMouse = this.state.zoomOverMouse;
     this.zoomEnabled = this.state.zoomEnabled;
     this.originX = this.state.originX;
     this.originY = this.state.originY;
@@ -93,7 +92,6 @@ export class Map extends Base {
       zoom: this.state.zoom,
       originPin: this.state.originPin,
       pinMargin: this.state.pinMargin,
-      zoomOverMouse: this.state.zoomOverMouse,
       zoomEnabled: this.state.zoomEnabled
     };
     
@@ -102,7 +100,6 @@ export class Map extends Base {
     // Set grid properties from state
     this.grid.setOriginPin(this.state.originPin);
     this.grid.setPinMargin(this.state.pinMargin);
-    this.grid.setZoomOverMouse(this.state.zoomOverMouse);
     
     this.grid.draw();
   }
@@ -321,12 +318,29 @@ export class Map extends Base {
     }
   }
 
-  setZoomOverMouse(followMouse) {
-    this.zoomOverMouse = followMouse;
-    this.state.setZoomOverMouse(followMouse);
-    if (this.grid) {
-      this.grid.setZoomOverMouse(followMouse);
-    }
+  
+  // Set minimum zoom level
+  setMinZoom(minZoom) {
+    // Update Map's minZoom property
+    this.minZoom = minZoom;
+    
+    // Update state's minZoom (which will emit events and adjust zoom if needed)
+    this.state.setMinZoom(minZoom);
+    
+    DEBUG.MAP.PANZOOM && console.log('[MAP:MIN_ZOOM] Set to', minZoom);
+    return this;
+  }
+  
+  // Set maximum zoom level
+  setMaxZoom(maxZoom) {
+    // Update Map's maxZoom property
+    this.maxZoom = maxZoom;
+    
+    // Update state's maxZoom (which will emit events and adjust zoom if needed)
+    this.state.setMaxZoom(maxZoom);
+    
+    DEBUG.MAP.PANZOOM && console.log('[MAP:MAX_ZOOM] Set to', maxZoom);
+    return this;
   }
 
   registerListeners() {
