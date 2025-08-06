@@ -183,9 +183,10 @@ class Grid extends Base {
         // labels
         labels: true,
         fontSize: '11pt',
-        fontFamily: 'sans-serif',
+        fontFamily: 'serif',
         padding: 0,
-        color: 'rgb(0,0,0,1)',
+        color: 'rgb(0,0,255,1)',
+        labelColor: 'rgb(0,0,255,1)',
 
         // lines params
         lines: true,
@@ -194,13 +195,13 @@ class Grid extends Base {
         lineWidth: 1,
         distance: 13,
         style: 'lines',
-        lineColor: 0.4,
+        lineColor: 'rgba(0, 0, 255, 0.4)',
 
         // axis params
         axis: true,
         axisOrigin: 0,
         axisWidth: 2,
-        axisColor: 0.8,
+        axisColor: 'rgba(0, 0, 255, 0.8)',
 
         // stub methods
         // return coords for the values, redefined by axes

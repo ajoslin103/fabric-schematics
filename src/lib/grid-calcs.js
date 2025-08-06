@@ -74,7 +74,8 @@ export function calculateCoordinateState(coord, shape) {
   state.axisWidth = coord.axisWidth || coord.lineWidth;
   state.lineWidth = coord.lineWidth;
   state.tickAlign = coord.tickAlign;
-  state.labelColor = state.color;
+  state.color = coord.color;
+  state.labelColor = coord.labelColor || coord.color;
   
   // Get padding
   if (typeof coord.padding === 'number') {
