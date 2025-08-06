@@ -161,6 +161,44 @@ class MapState extends EventEmitter2 {
     }
     return this;
   }
+
+  // Set minimum zoom level
+  setMinZoom(minZoom) {
+    if (minZoom !== this.minZoom) {
+      const prevState = { ...this };
+      const prevMinZoom = this.minZoom;
+      this.minZoom = minZoom;
+      
+      // Ensure zoom stays within bounds
+      if (this.zoom < minZoom) {
+        this.zoom = minZoom;
+      }
+      
+      DEBUG.STATE.GENERAL && console.log('[STATE:MIN_ZOOM] Changed from', prevMinZoom, 'to', minZoom);
+      this.emit('change:minZoom', { prevState, newState: this });
+      this.emit('change', { prevState, newState: this });
+    }
+    return this;
+  }
+  
+  // Set maximum zoom level
+  setMaxZoom(maxZoom) {
+    if (maxZoom !== this.maxZoom) {
+      const prevState = { ...this };
+      const prevMaxZoom = this.maxZoom;
+      this.maxZoom = maxZoom;
+      
+      // Ensure zoom stays within bounds
+      if (this.zoom > maxZoom) {
+        this.zoom = maxZoom;
+      }
+      
+      DEBUG.STATE.GENERAL && console.log('[STATE:MAX_ZOOM] Changed from', prevMaxZoom, 'to', maxZoom);
+      this.emit('change:maxZoom', { prevState, newState: this });
+      this.emit('change', { prevState, newState: this });
+    }
+    return this;
+  }
   
   
   // Update delta values
