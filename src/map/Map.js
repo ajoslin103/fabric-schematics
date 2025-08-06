@@ -51,11 +51,14 @@ export class Map extends Base {
     
     // Listen for state changes
     this.state.on('change', ({ prevState, newState }) => {
-      DEBUG.MAP.GENERAL && console.log('[MAP:STATE_CHANGE] Type:', arguments[0]?.type || 'general');
+      const eventType = arguments[0]?.type || 'general';
+      DEBUG.MAP.GENERAL && console.log('[MAP:STATE_CHANGE] Type:', eventType);
       
       // Update mirrored properties
       this.center = this.state.center;
       this.zoom = this.state.zoom;
+      this.minZoom = this.state.minZoom;
+      this.maxZoom = this.state.maxZoom;
       this.originX = this.state.originX;
       this.originY = this.state.originY;
       this.dx = this.state.dx;
@@ -66,7 +69,11 @@ export class Map extends Base {
       this.lastUpdatedTime = this.state.lastUpdatedTime;
       this.mode = this.state.mode;
       
-      DEBUG.MAP.MIRRORING && console.log('[MAP:MIRRORED_PROPS] Updated properties from state');
+      DEBUG.MAP.MIRRORING && console.log('[MAP:MIRRORED_PROPS] Updated properties from state', {
+        zoom: this.zoom,
+        minZoom: this.minZoom,
+        maxZoom: this.maxZoom
+      });
       
       this.update();
     });
@@ -125,8 +132,10 @@ export class Map extends Base {
   setZoom(zoom) {
     DEBUG.MAP.PANZOOM && console.log('[MAP:SET_ZOOM] Called with zoom level', zoom);
     
-    this.zoom = zoom;
-    this.state.setZoom(zoom);
+    // Ensure zoom is within min/max range
+    const clampedZoom = Math.max(this.minZoom, Math.min(zoom, this.maxZoom));
+    this.zoom = clampedZoom;
+    this.state.setZoom(clampedZoom);
     
     this.dx = 0;
     this.dy = 0;
@@ -327,6 +336,30 @@ export class Map extends Base {
     if (this.grid) {
       this.grid.setZoomOverMouse(followMouse);
     }
+  }
+  
+  // Set minimum zoom level
+  setMinZoom(minZoom) {
+    // Update Map's minZoom property
+    this.minZoom = minZoom;
+    
+    // Update state's minZoom (which will emit events and adjust zoom if needed)
+    this.state.setMinZoom(minZoom);
+    
+    DEBUG.MAP.PANZOOM && console.log('[MAP:MIN_ZOOM] Set to', minZoom);
+    return this;
+  }
+  
+  // Set maximum zoom level
+  setMaxZoom(maxZoom) {
+    // Update Map's maxZoom property
+    this.maxZoom = maxZoom;
+    
+    // Update state's maxZoom (which will emit events and adjust zoom if needed)
+    this.state.setMaxZoom(maxZoom);
+    
+    DEBUG.MAP.PANZOOM && console.log('[MAP:MAX_ZOOM] Set to', maxZoom);
+    return this;
   }
 
   registerListeners() {

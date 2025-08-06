@@ -61,6 +61,44 @@ class MapState extends EventEmitter2 {
     return this;
   }
   
+  // Set minimum zoom level
+  setMinZoom(minZoom) {
+    if (minZoom !== this.minZoom) {
+      const prevState = { ...this };
+      const prevMinZoom = this.minZoom;
+      this.minZoom = minZoom;
+      
+      // Ensure current zoom respects the new minimum
+      if (this.zoom < this.minZoom) {
+        this.zoom = this.minZoom;
+      }
+      
+      DEBUG.STATE.PANZOOM && console.log('[STATE:MIN_ZOOM] Changed from', prevMinZoom, 'to', this.minZoom);
+      this.emit('change:minZoom', { prevState, newState: this });
+      this.emit('change', { prevState, newState: this });
+    }
+    return this;
+  }
+  
+  // Set maximum zoom level
+  setMaxZoom(maxZoom) {
+    if (maxZoom !== this.maxZoom) {
+      const prevState = { ...this };
+      const prevMaxZoom = this.maxZoom;
+      this.maxZoom = maxZoom;
+      
+      // Ensure current zoom respects the new maximum
+      if (this.zoom > this.maxZoom) {
+        this.zoom = this.maxZoom;
+      }
+      
+      DEBUG.STATE.PANZOOM && console.log('[STATE:MAX_ZOOM] Changed from', prevMaxZoom, 'to', this.maxZoom);
+      this.emit('change:maxZoom', { prevState, newState: this });
+      this.emit('change', { prevState, newState: this });
+    }
+    return this;
+  }
+  
   // Set center point
   setCenter(x, y) {
     if (x !== this.center.x || y !== this.center.y) {
@@ -271,7 +309,11 @@ class MapState extends EventEmitter2 {
     // Update all related properties at once
     this.center.setX(x);
     this.center.setY(y);
-    this.zoom = 1 / curZoom;
+    
+    // Calculate new zoom and ensure it's within the limits
+    const newZoom = 1 / curZoom;
+    this.zoom = clamp(newZoom, this.minZoom, this.maxZoom);
+    
     this.dx = e.dx;
     this.dy = e.dy;
     this.x = e.x0;
