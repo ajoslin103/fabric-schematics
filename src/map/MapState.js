@@ -2,6 +2,7 @@ import EventEmitter2 from 'eventemitter2';
 import { Point } from '../geometry/Point';
 import { MAP, Modes, OriginPin } from '../core/Constants';
 import { clamp } from '../lib/mumath/index';
+import { DEBUG } from '../utils/debug';
 
 class MapState extends EventEmitter2 {
   constructor(options = {}) {
@@ -53,6 +54,7 @@ class MapState extends EventEmitter2 {
     if (newZoom !== this.zoom) {
       const prevState = { ...this };
       this.zoom = newZoom;
+      DEBUG.STATE.PANZOOM && console.log('[STATE:ZOOM] Changed from', prevState.zoom, 'to', this.zoom);
       this.emit('change:zoom', { prevState, newState: this });
       this.emit('change', { prevState, newState: this });
     }
@@ -63,8 +65,11 @@ class MapState extends EventEmitter2 {
   setCenter(x, y) {
     if (x !== this.center.x || y !== this.center.y) {
       const prevState = { ...this };
+      const prevX = this.center.x;
+      const prevY = this.center.y;
       this.center.setX(x);
       this.center.setY(y);
+      DEBUG.STATE.POSITION && console.log('[STATE:CENTER] Changed from', {x: prevX, y: prevY}, 'to', {x: this.center.x, y: this.center.y});
       this.emit('change:center', { prevState, newState: this });
       this.emit('change', { prevState, newState: this });
     }
@@ -75,8 +80,11 @@ class MapState extends EventEmitter2 {
   setCoordinates(x, y) {
     if (x !== this.x || y !== this.y) {
       const prevState = { ...this };
+      const prevX = this.x;
+      const prevY = this.y;
       this.x = x;
       this.y = y;
+      DEBUG.STATE.POSITION && console.log('[STATE:COORDINATES] Changed from', {x: prevX, y: prevY}, 'to', {x, y});
       this.emit('change:coordinates', { prevState, newState: this });
       this.emit('change', { prevState, newState: this });
     }
@@ -87,10 +95,14 @@ class MapState extends EventEmitter2 {
   setDimensions(width, height) {
     if (width !== this.width || height !== this.height) {
       const prevState = { ...this };
+      const prevWidth = this.width;
+      const prevHeight = this.height;
       this.width = width;
       this.height = height;
       this.originX = -width / 2;
       this.originY = -height / 2;
+      DEBUG.STATE.DIMENSIONS && console.log('[STATE:DIMENSIONS] Changed from', {width: prevWidth, height: prevHeight}, 'to', {width, height});
+      DEBUG.STATE.DIMENSIONS && console.log('[STATE:ORIGIN] Updated to', {x: this.originX, y: this.originY});
       this.emit('change:dimensions', { prevState, newState: this });
       this.emit('change', { prevState, newState: this });
     }
@@ -101,7 +113,9 @@ class MapState extends EventEmitter2 {
   setMode(mode) {
     if (mode !== this.mode) {
       const prevState = { ...this };
+      const prevMode = this.mode;
       this.mode = mode;
+      DEBUG.STATE.MODE && console.log('[STATE:MODE] Changed from', prevMode, 'to', mode);
       this.emit('change:mode', { prevState, newState: this });
       this.emit('change', { prevState, newState: this });
     }
@@ -129,7 +143,9 @@ class MapState extends EventEmitter2 {
   setOriginPin(corner) {
     if (corner !== this.originPin) {
       const prevState = { ...this };
+      const prevCorner = this.originPin;
       this.originPin = corner;
+      DEBUG.STATE.GENERAL && console.log('[STATE:ORIGIN_PIN] Changed from', prevCorner, 'to', corner);
       this.emit('change:originPin', { prevState, newState: this });
       this.emit('change', { prevState, newState: this });
     }
@@ -162,8 +178,11 @@ class MapState extends EventEmitter2 {
   setDeltas(dx, dy) {
     if (dx !== this.dx || dy !== this.dy) {
       const prevState = { ...this };
+      const prevDx = this.dx;
+      const prevDy = this.dy;
       this.dx = dx;
       this.dy = dy;
+      DEBUG.STATE.POSITION && console.log('[STATE:DELTAS] Changed from', {dx: prevDx, dy: prevDy}, 'to', {dx, dy});
       this.emit('change:deltas', { prevState, newState: this });
       this.emit('change', { prevState, newState: this });
     }
@@ -195,12 +214,23 @@ class MapState extends EventEmitter2 {
   
   // Update lastUpdatedTime
   updateTimestamp() {
+    const prevTime = this.lastUpdatedTime;
     this.lastUpdatedTime = Date.now();
+    DEBUG.STATE.GENERAL && console.log('[STATE:TIMESTAMP] Updated from', prevTime, 'to', this.lastUpdatedTime);
     return this;
   }
   
   // Process panzoom events
   processPanzoom(e) {
+    DEBUG.STATE.PANZOOM && console.log('[STATE:PANZOOM] Processing event', {
+      dx: e.dx,
+      dy: e.dy,
+      dz: e.dz,
+      x0: e.x0,
+      y0: e.y0,
+      isRight: e.isRight
+    });
+    
     const { width, height } = this;
     const zoom = clamp(-e.dz, -height * 0.75, height * 0.75) / height;
 
@@ -234,6 +264,9 @@ class MapState extends EventEmitter2 {
     }
 
     const prevState = { ...this };
+    const prevCenterX = this.center.x;
+    const prevCenterY = this.center.y;
+    const prevZoomVal = this.zoom;
     
     // Update all related properties at once
     this.center.setX(x);
@@ -244,6 +277,14 @@ class MapState extends EventEmitter2 {
     this.x = e.x0;
     this.y = e.y0;
     this.isRight = e.isRight;
+    
+    DEBUG.STATE.PANZOOM && console.log('[STATE:PANZOOM] State updated', {
+      center: { from: {x: prevCenterX, y: prevCenterY}, to: {x: this.center.x, y: this.center.y} },
+      zoom: { from: prevZoomVal, to: this.zoom },
+      coordinates: { x: this.x, y: this.y },
+      deltas: { dx: this.dx, dy: this.dy },
+      isRight: this.isRight
+    });
     
     this.emit('change:panzoom', { prevState, newState: this });
     this.emit('change', { prevState, newState: this });

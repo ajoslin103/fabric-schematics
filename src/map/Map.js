@@ -4,7 +4,7 @@ import Base from '../core/Base';
 import Grid from '../grid/Grid';
 import { Point } from '../geometry/Point';
 import MapState from './MapState';
-
+import { DEBUG } from '../utils/debug';
 import createEventSpy from '../utils/event-spy';
 const enableEventSpy = createEventSpy();
 
@@ -12,7 +12,7 @@ export class Map extends Base {
   constructor(container, options) {
     super(options);
 
-    enableEventSpy('map', this);
+    DEBUG.EVENTS.EMITTER && enableEventSpy('map', this);
     
     // Initialize container and canvas
     this.container = container || document.body;
@@ -50,7 +50,9 @@ export class Map extends Base {
     this.mode = this.state.mode;
     
     // Listen for state changes
-    this.state.on('change', ({ newState }) => {
+    this.state.on('change', ({ prevState, newState }) => {
+      DEBUG.MAP.GENERAL && console.log('[MAP:STATE_CHANGE] Type:', arguments[0]?.type || 'general');
+      
       // Update mirrored properties
       this.center = this.state.center;
       this.zoom = this.state.zoom;
@@ -63,6 +65,8 @@ export class Map extends Base {
       this.isRight = this.state.isRight;
       this.lastUpdatedTime = this.state.lastUpdatedTime;
       this.mode = this.state.mode;
+      
+      DEBUG.MAP.MIRRORING && console.log('[MAP:MIRRORED_PROPS] Updated properties from state');
       
       this.update();
     });
@@ -119,6 +123,8 @@ export class Map extends Base {
   // }
 
   setZoom(zoom) {
+    DEBUG.MAP.PANZOOM && console.log('[MAP:SET_ZOOM] Called with zoom level', zoom);
+    
     this.zoom = zoom;
     this.state.setZoom(zoom);
     
@@ -132,6 +138,7 @@ export class Map extends Base {
     
     // Double update for immediate visual feedback
     setTimeout(() => {
+      DEBUG.MAP.PANZOOM && console.log('[MAP:SET_ZOOM] Triggering immediate update');
       this.update();
     }, 0);
   }
@@ -174,6 +181,8 @@ export class Map extends Base {
   onResize(width, height) {
     width = width || this.container.clientWidth;
     height = height || this.container.clientHeight;
+    
+    DEBUG.MAP.DIMENSIONS && console.log('[MAP:RESIZE] Resizing to', {width, height});
 
     this.canvas.width = width;
     this.canvas.height = height;
@@ -184,9 +193,12 @@ export class Map extends Base {
 
     // Update state with new dimensions
     this.state.setDimensions(width, height);
+    DEBUG.MAP.DIMENSIONS && console.log('[MAP:RESIZE] Canvas and state dimensions updated');
   }
 
   update() {
+    DEBUG.MAP.RENDER && console.log('[MAP:UPDATE] Starting map update');
+    
     if (this.grid) {
       // Ensure Grid has access to the latest state values it needs
       this.grid.center = this.center;
@@ -194,6 +206,12 @@ export class Map extends Base {
       this.grid.zoomEnabled = this.zoomEnabled;
       
       // Update the grid with current state
+      DEBUG.MAP.RENDER && console.log('[MAP:UPDATE] Updating grid with', {
+        x: this.center.x,
+        y: this.center.y,
+        zoom: this.zoom
+      });
+      
       this.grid.update2({
         x: this.center.x,
         y: this.center.y,
@@ -210,19 +228,31 @@ export class Map extends Base {
     if (this.isGrabMode() || this.isRight) {
       this.emit('panning');
       this.setCursor('grab');
+      DEBUG.MAP.GENERAL && console.log('[MAP:UPDATE] In grab mode or right mouse button pressed');
     } else {
       this.setCursor('pointer');
     }
 
     const now = Date.now();
     if (this.lastUpdatedTime && Math.abs(this.lastUpdatedTime - now) < 100) {
+      DEBUG.MAP.TIMESTAMP && console.log('[MAP:UPDATE] Skipping timestamp update - too soon');
       return;
     }
     this.lastUpdatedTime = now;
     this.state.updateTimestamp();
+    DEBUG.MAP.RENDER && console.log('[MAP:UPDATE] Update completed');
   }
 
   panzoom(e) {
+    DEBUG.MAP.PANZOOM && console.log('[MAP:PANZOOM] Processing panzoom event', {
+      dx: e.dx,
+      dy: e.dy,
+      dz: e.dz,
+      x: e.x,
+      y: e.y,
+      isRight: e.isRight
+    });
+    
     // Update state using the panzoom event
     this.state.processPanzoom(e);
     
@@ -235,6 +265,11 @@ export class Map extends Base {
     this.y = this.state.y;
     this.isRight = this.state.isRight;
     
+    DEBUG.MAP.PANZOOM && console.log('[MAP:PANZOOM] Updated map properties from state', {
+      center: {x: this.center.x, y: this.center.y},
+      zoom: this.zoom
+    });
+    
     // Update cursor based on interaction mode
     if (this.isGrabMode() || e.isRight) {
       this.setCursor('grab');
@@ -244,12 +279,16 @@ export class Map extends Base {
   }
 
   setView(view) {
+    DEBUG.MAP.GENERAL && console.log('[MAP:SET_VIEW] Called with view', view);
+    
     // Update state
     this.state.setDeltas(0, 0);
     this.state.setCoordinates(0, 0);
     
     // Flip Y coordinate to match the expected coordinate system
     const flippedView = new Point(view.x, -view.y);
+    DEBUG.MAP.GENERAL && console.log('[MAP:SET_VIEW] Flipped Y coordinate', flippedView);
+    
     this.state.center.copy(flippedView);
     
     // Update mirrored properties
@@ -261,6 +300,7 @@ export class Map extends Base {
     
     // Double update for immediate visual feedback
     setTimeout(() => {
+      DEBUG.MAP.GENERAL && console.log('[MAP:SET_VIEW] Triggering immediate update');
       this.update();
     }, 0);
   }
