@@ -15,7 +15,10 @@ describe('Map Class Tests', () => {
   before(() => {
     // Use the test container from setup
     const testContainer = global.testContainer || document.body;
-    lib = new Map(testContainer, {
+    // Create canvas first
+    const canvas = document.createElement('canvas');
+    testContainer.appendChild(canvas);
+    lib = new Map(canvas, testContainer, {
       width: 800,
       height: 600
     });
@@ -23,7 +26,7 @@ describe('Map Class Tests', () => {
   
   it('should initialize with a canvas', () => {
     expect(lib.canvas).to.exist;
-    expect(lib.canvas).to.be.instanceof(fabric.Canvas);
+    expect(lib.canvas instanceof HTMLCanvasElement).to.be.true;
   });
 });
 

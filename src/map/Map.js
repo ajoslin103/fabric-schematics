@@ -9,16 +9,14 @@ import createEventSpy from '../utils/event-spy';
 const enableEventSpy = createEventSpy();
 
 export class Map extends Base {
-  constructor(container, options) {
+  constructor(canvas, container, options) {
     super(options);
 
     DEBUG.EVENTS.EMITTER && enableEventSpy('map', this);
     
-    // Initialize container and canvas
-    this.container = container || document.body;
-    this.canvas = document.createElement('canvas');
-    this.container.appendChild(this.canvas);
-    this.canvas.setAttribute('id', 'schematics-canvas');
+    // Initialize canvas and container
+    this.canvas = canvas;
+    this.container = container || this.canvas.parentElement || document.body;
     
     const width = options?.width || this.container.clientWidth;
     const height = options?.height || this.container.clientHeight;
@@ -77,6 +75,11 @@ export class Map extends Base {
     });
 
     this.registerListeners();
+
+    // Add grid if showGrid option is true
+    if (options?.showGrid) {
+      this.addGrid();
+    }
 
     setTimeout(() => {
       this.emit('ready', this);

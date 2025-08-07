@@ -8,7 +8,10 @@ describe('Map', () => {
 
   beforeEach(() => {
     container = createTestContainer();
-    map = new Map(container, {
+    const canvas = document.createElement('canvas');
+    canvas.id = 'fabric-schematics-canvas';
+    container.appendChild(canvas);
+    map = new Map(canvas, container, {
       width: 800,
       height: 600,
       showGrid: false
@@ -42,9 +45,11 @@ describe('Map', () => {
 
   describe('Grid', () => {
     it('should add grid when showGrid is true', () => {
-      const mapWithGrid = new Map(container, { showGrid: true });
-      const gridCanvas = container.querySelector('#fabric-schematics-grid-canvas');
-      expect(gridCanvas).to.exist;
+      const gridCanvas = document.createElement('canvas');
+      container.appendChild(gridCanvas);
+      const mapWithGrid = new Map(gridCanvas, container, { showGrid: true });
+      const gridCanvasElement = container.querySelector('#fabric-schematics-grid-canvas');
+      expect(gridCanvasElement).to.exist;
       mapWithGrid.canvas.dispose();
     });
   });
