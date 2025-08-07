@@ -25,20 +25,20 @@ export * from './map/index';
 // Grid system
 export * from './grid/index';
 
-// Schematic components
-export * from './schematic/index';
+// Schematic components (removed)
+// export * from './schematic/index';
 
 // Import what we need for the browser
 import { Map } from './map/Map';
 import { OriginPin } from './core/Constants';
-import Schematic from './schematic/Schematic';
+// import Schematic from './schematic/Schematic';
 
 // Collect all exports
 const allExports = {
   version,
   Map,
   OriginPin,
-  Schematic
+  // Schematic
 };
 
 // If we're in a browser environment, add to global scope
@@ -49,11 +49,11 @@ if (typeof window !== 'undefined') {
   // Create namespace
   window.FabricSchematics = allExports;
   
-  // Explicitly register Schematic class on fabric object
-  if (window.fabric) {
-    fabric.Schematic = Schematic;
-    fabric.Schematic.fromObject = Schematic.fromObject;
-  }
+  // // Explicitly register Schematic class on fabric object
+  // if (window.fabric) {
+  //   fabric.Schematic = Schematic;
+  //   fabric.Schematic.fromObject = Schematic.fromObject;
+  // }
   
   // Provide noConflict method
   window.FabricSchematics.noConflict = function() {
