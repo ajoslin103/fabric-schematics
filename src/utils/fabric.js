@@ -18,3 +18,7 @@ if (typeof window !== 'undefined' && window.fabric) {
 
 // Re-export fabric
 export const fabric = fabricObj;
+
+export function canvasIsFabricCanvas(canvasElement) {
+  return !!canvasElement?.['absolutePan'];
+}

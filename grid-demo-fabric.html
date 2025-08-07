@@ -80,12 +80,8 @@
         // Add the fabricCanvas element to the container
         container.appendChild(fabricCanvas.wrapperEl);
         
-        // Get the lower canvas from Fabric.js
-        const lowerCanvas = fabricCanvas.lowerCanvasEl;
-        lowerCanvas.setAttribute('id', 'schematics-canvas');
-        
-        // Create the map with grid enabled, passing the Fabric.js lower canvas
-        const map = new window.FabricSchematics.Map(lowerCanvas, container, {
+        // Create the map with grid enabled, passing the Fabric.js canvas
+        const map = new window.FabricSchematics.Map(fabricCanvas, container, {
           width: 800,
           height: 600,
           showGrid: true,

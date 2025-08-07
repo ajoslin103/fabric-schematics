@@ -11,6 +11,7 @@ import {
   calculateCoordinateState,
   calculateAxisUpdates
 } from '../lib/grid-calcs';
+import { canvasIsFabricCanvas } from '../utils/fabric';
 
 // constructor
 class Grid extends Base {
@@ -24,6 +25,10 @@ class Grid extends Base {
     // Store a reference to the map's style if available
     this.mapStyle = opts && opts.state && opts.state.style ? opts.state.style : null;
     DEBUG.GRID.GENERAL && console.log('[GRID:INIT] Initializing with map style:', this.mapStyle);
+    
+    // are we using a fabric canvas?
+    this.isFabricCanvas = canvasIsFabricCanvas(canvas);
+    console.log('[GRID:INIT] Using fabric canvas:', this.isFabricCanvas);
     
     // Create renderer
     this.renderer = new GridRender(canvas);
