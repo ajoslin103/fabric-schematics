@@ -3,7 +3,7 @@
 const path = require('path');
 const env = require('yargs').argv.env; // use --env with webpack 2
 
-const libraryName = 'FabricLayers';
+const libraryName = 'FabricSchematics';
 
 let outputFile;
 let mode;

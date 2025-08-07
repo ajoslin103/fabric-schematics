@@ -30,7 +30,7 @@ describe('Map', () => {
     it('should create a canvas element', () => {
       const canvas = container.querySelector('canvas');
       expect(canvas).to.exist;
-      expect(canvas.id).to.equal('fabric-layers-canvas');
+      expect(canvas.id).to.equal('fabric-schematics-canvas');
     });
 
     it('should initialize with default options', () => {
@@ -43,7 +43,7 @@ describe('Map', () => {
   describe('Grid', () => {
     it('should add grid when showGrid is true', () => {
       const mapWithGrid = new Map(container, { showGrid: true });
-      const gridCanvas = container.querySelector('#fabric-layers-grid-canvas');
+      const gridCanvas = container.querySelector('#fabric-schematics-grid-canvas');
       expect(gridCanvas).to.exist;
       mapWithGrid.canvas.dispose();
     });
