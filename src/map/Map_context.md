@@ -1,15 +1,15 @@
 # Map Object - Current State and Goals
 
-## Current State (180 words)
+## Current State (150 words)
 
-The Map class is a standalone canvas controller that manages a native HTML5 canvas element with Grid rendering overlay. It extends Base through a mixin architecture, incorporating ModesMixin for interaction mode management (select/grab). The class creates a single canvas element and delegates grid rendering to a separate Grid instance that shares the same canvas.
+The Map class is a standalone canvas controller that manages a native HTML5 canvas element with Grid rendering capabilities. It directly extends Base and delegates mode management to its MapState instance. The class creates a single canvas element and connects a Grid instance to this canvas when addGrid() is called.
 
-Map handles all viewport interactions through an integrated panzoom library, managing zoom levels, pan operations, and coordinate transformations. It maintains its own coordinate system with configurable center point, zoom level, and origin positioning. The class supports advanced features like origin pinning to canvas corners, configurable pin margins, and mouse-following zoom behavior.
+Map handles viewport interactions through an integrated panzoom library, managing zoom levels, pan operations, and coordinate transformations. It maintains its own coordinate system with configurable center point and zoom level. The class provides methods for origin pinning (setOriginPin) and margin configuration (setPinMargin) that are passed to the Grid when present.
 
-The rendering architecture is purely canvas-based with no Fabric.js integration. Map coordinates Grid updates by passing its current center, zoom, and size parameters. It manages cursor styles based on interaction modes and emits events for state changes including updates and panning operations.
+The implementation is purely canvas-based with no Fabric.js integration. Map updates Grid by passing its current center, zoom, and size parameters. It manages cursor styles based on interaction modes and emits events for state changes including 'ready', 'update', and 'panning'. 
 
-Map handles DOM lifecycle including canvas creation, container management, window resize events, and cleanup. The implementation is streamlined for grid-only rendering without object management capabilities.
+Map handles DOM lifecycle including canvas creation, container management, window resize events, and cleanup.
 
 ## Goals (50 words)
 
-Transform the canvas-based Map controller into a proper Fabric.js custom object while maintaining all current functionality. The new implementation should integrate Grid rendering directly into Fabric.js object lifecycle, support standard object behaviors including selection and transformation, and provide clean serialization for saving/restoring states.
+Transform the canvas-based Map controller into a proper fabric.js custom object (similar to the Schematic class). The implementation should maintain all current functionality, integrate Grid rendering directly with fabric.js, support standard fabric.js object behaviors, and provide clean serialization. This will enable full integration with the fabric.js ecosystem.
