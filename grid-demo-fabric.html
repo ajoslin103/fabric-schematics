@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grid Demo</title>
+    <title>Fabric Grid Demo</title>
     <style>
         body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
         #canvas-container { border: 1px solid #ccc; margin: 20px 0; width: 800px; height: 600px; background: #f8f9fa; }
@@ -13,7 +13,7 @@
     </style>
 </head>
 <body>
-    <h1>Grid Demo</h1>
+    <h1>Fabric Grid Demo</h1>
     <div class="controls">
         <label style="margin-right:10px;">
           Min Zoom: <input id="minZoomInput" type="number" step="0.01" value="0.05" style="width:70px;">
@@ -22,7 +22,7 @@
           Max Zoom: <input id="maxZoomInput" type="number" step="0.01" value="20" style="width:70px;">
         </label>
         <button id="resetView">Reset View</button>
-        <button id="addShape">Add Shape</button>
+        <!-- <button id="addShape">Add Shape</button> -->
         <br><br>
         <label style="margin-right:10px;">
           Pin Origin: 
@@ -91,19 +91,19 @@
         // Store fabricCanvas reference for later use
         map.fabricCanvas = fabricCanvas;
         
-        // Add a sample rectangle to demonstrate Fabric.js functionality
-        const rect = new fabric.Rect({
-          left: 100,
-          top: 100,
-          width: 50,
-          height: 50,
-          fill: 'red',
-          stroke: 'black',
-          strokeWidth: 2
-        });
+        // // Add a sample rectangle to demonstrate Fabric.js functionality
+        // const rect = new fabric.Rect({
+        //   left: 100,
+        //   top: 100,
+        //   width: 50,
+        //   height: 50,
+        //   fill: 'red',
+        //   stroke: 'black',
+        //   strokeWidth: 2
+        // });
         
-        fabricCanvas.add(rect);
-        fabricCanvas.renderAll();
+        // fabricCanvas.add(rect);
+        // fabricCanvas.renderAll();
 
         // Development helper to log a message
         map.on('logevent', function(data) {
@@ -121,42 +121,42 @@
           if (typeof map.reset === 'function') map.reset();
         };
         
-        // Add Shape button
-        document.getElementById('addShape').onclick = function() {
-          // Generate random properties for the shape
-          const colors = ['blue', 'green', 'purple', 'orange', 'yellow'];
-          const randomColor = colors[Math.floor(Math.random() * colors.length)];
-          const randomLeft = Math.floor(Math.random() * 700) + 50;
-          const randomTop = Math.floor(Math.random() * 500) + 50;
-          const randomSize = Math.floor(Math.random() * 60) + 20;
+        // // Add Shape button
+        // document.getElementById('addShape').onclick = function() {
+        //   // Generate random properties for the shape
+        //   const colors = ['blue', 'green', 'purple', 'orange', 'yellow'];
+        //   const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        //   const randomLeft = Math.floor(Math.random() * 700) + 50;
+        //   const randomTop = Math.floor(Math.random() * 500) + 50;
+        //   const randomSize = Math.floor(Math.random() * 60) + 20;
           
-          // Create a random shape (circle or rectangle)
-          let shape;
-          if (Math.random() > 0.5) {
-            shape = new fabric.Circle({
-              left: randomLeft,
-              top: randomTop,
-              radius: randomSize / 2,
-              fill: randomColor,
-              stroke: 'black',
-              strokeWidth: 2
-            });
-          } else {
-            shape = new fabric.Rect({
-              left: randomLeft,
-              top: randomTop,
-              width: randomSize,
-              height: randomSize,
-              fill: randomColor,
-              stroke: 'black',
-              strokeWidth: 2
-            });
-          }
+        //   // Create a random shape (circle or rectangle)
+        //   let shape;
+        //   if (Math.random() > 0.5) {
+        //     shape = new fabric.Circle({
+        //       left: randomLeft,
+        //       top: randomTop,
+        //       radius: randomSize / 2,
+        //       fill: randomColor,
+        //       stroke: 'black',
+        //       strokeWidth: 2
+        //     });
+        //   } else {
+        //     shape = new fabric.Rect({
+        //       left: randomLeft,
+        //       top: randomTop,
+        //       width: randomSize,
+        //       height: randomSize,
+        //       fill: randomColor,
+        //       stroke: 'black',
+        //       strokeWidth: 2
+        //     });
+        //   }
           
-          // Add to canvas and render
-          fabricCanvas.add(shape);
-          fabricCanvas.renderAll();
-        };
+        //   // Add to canvas and render
+        //   fabricCanvas.add(shape);
+        //   fabricCanvas.renderAll();
+        // };
 
         // Wire pin select & margin
         const pinSelect = document.getElementById('pinSelect');

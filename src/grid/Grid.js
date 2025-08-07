@@ -4,6 +4,7 @@ import Axis from './Axis';
 import { Point } from '../geometry/Point';
 import { DEBUG } from '../utils/debug';
 import GridRender from './GridRender';
+import FabricRender from './FabricRender';
 import {
   calculatePinnedX,
   calculatePinnedY,
@@ -29,9 +30,9 @@ class Grid extends Base {
     // are we using a fabric canvas?
     this.isFabricCanvas = canvasIsFabricCanvas(canvas);
     console.log('[GRID:INIT] Using fabric canvas:', this.isFabricCanvas);
-    
-    // Create renderer
-    this.renderer = new GridRender(canvas);
+
+    // Create renderer based on canvas type
+    this.renderer = this.isFabricCanvas ? new FabricRender(canvas) : new GridRender(canvas);
     
     this.update(opts);
   }
