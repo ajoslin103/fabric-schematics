@@ -23,7 +23,7 @@ describe('Map Class Tests', function() {
   
   it('should initialize with a canvas', function() {
     // Initialize Map instance
-    mapInstance = new FabricLayers.Map(container, {
+    mapInstance = new FabricSchematics.Map(container, {
       width: 800,
       height: 600
     });

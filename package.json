@@ -1,6 +1,6 @@
 {
   "name": "fabric-schematics",
-  "version": "1.1.19",
+  "version": "1.1.25",
   "description": "Schematic and diagram visualization components for fabric.js",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -32,7 +32,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ajoslin103/https://github.com/ajoslin103/fabric-schematics"
+    "url": "git+https://github.com/ajoslin103/fabric-schematics.git"
   },
   "keywords": [
     "fabric.js",
@@ -45,9 +45,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ajoslin103/https://github.com/ajoslin103/fabric-schematics/issues"
+    "url": "https://github.com/ajoslin103/fabric-schematics/issues"
   },
-  "homepage": "https://github.com/ajoslin103/https://github.com/ajoslin103/fabric-schematics#readme",
+  "homepage": "https://github.com/ajoslin103/fabric-schematics#readme",
   "devDependencies": {
     "@babel/cli": "^7.24.5",
     "@babel/core": "^7.24.5",

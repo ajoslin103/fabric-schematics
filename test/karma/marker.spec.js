@@ -7,25 +7,25 @@ describe('Marker Class Tests', function() {
     this.skip();
   });
   it('Marker class should be exported (skipped)', function() {
-    // Debug: Log what's available in FabricLayers
-    console.log('FabricLayers available:', !!window.FabricLayers);
-    console.log('FabricLayers keys:', Object.keys(window.FabricLayers || {}));
-    console.log('FabricLayers contents:', window.FabricLayers);
+    // Debug: Log what's available in FabricSchematics
+    console.log('FabricSchematics available:', !!window.FabricSchematics);
+    console.log('FabricSchematics keys:', Object.keys(window.FabricSchematics || {}));
+    console.log('FabricSchematics contents:', window.FabricSchematics);
     
     // Verify the Marker class is available
-    expect(window.FabricLayers).to.exist;
-    expect(window.FabricLayers.Marker).to.exist;
-    expect(typeof window.FabricLayers.Marker).to.equal('function');
+    expect(window.FabricSchematics).to.exist;
+    expect(window.FabricSchematics.Marker).to.exist;
+    expect(typeof window.FabricSchematics.Marker).to.equal('function');
   });
   
   it('Marker class should have the right prototype chain (skipped)', function() {
-    if (!window.FabricLayers || !window.FabricLayers.Marker) {
+    if (!window.FabricSchematics || !window.FabricSchematics.Marker) {
       this.skip();
       return;
     }
     
     // Test the structure of the Marker class without instantiating
-    const Marker = window.FabricLayers.Marker;
+    const Marker = window.FabricSchematics.Marker;
     const proto = Marker.prototype;
     
     // Check that key methods exist on the prototype

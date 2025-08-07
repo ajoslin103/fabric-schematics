@@ -23,7 +23,7 @@ describe('Map Class Tests', () => {
   
   it('should initialize with a canvas', () => {
     expect(lib.canvas).to.exist;
-    expect(lib.canvas).to.be.instanceof(FabricLayersPaintingCanvas);
+    expect(lib.canvas).to.be.instanceof(fabric.Canvas);
   });
 });
 
