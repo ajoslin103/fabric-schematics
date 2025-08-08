@@ -91,19 +91,19 @@
         // Store fabricCanvas reference for later use
         map.fabricCanvas = fabricCanvas;
         
-        // // Add a sample rectangle to demonstrate Fabric.js functionality
-        // const rect = new fabric.Rect({
-        //   left: 100,
-        //   top: 100,
-        //   width: 50,
-        //   height: 50,
-        //   fill: 'red',
-        //   stroke: 'black',
-        //   strokeWidth: 2
-        // });
+        // Add a sample rectangle to demonstrate Fabric.js functionality
+        const rect = new fabric.Rect({
+          left: 100,
+          top: 100,
+          width: 50,
+          height: 50,
+          fill: 'red',
+          stroke: 'black',
+          strokeWidth: 2
+        });
         
-        // fabricCanvas.add(rect);
-        // fabricCanvas.renderAll();
+        fabricCanvas.add(rect);
+        fabricCanvas.renderAll();
 
         // Development helper to log a message
         map.on('logevent', function(data) {
