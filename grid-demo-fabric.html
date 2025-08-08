@@ -227,10 +227,9 @@
         map.on('update', function() {
           updateZoomDisplay();
           
-          // Sync fabric canvas with map's pan/zoom state
-          // Note: This is a simplified sync for demo purposes
-          // In a production environment, you would need more sophisticated sync logic
-          fabricCanvas.setZoom(map.zoom);
+          // We intentionally don't sync the fabric.Canvas zoom with map.zoom
+          // This prevents double-scaling effects (grid is already scaled internally)
+          // Note: Only sync the rendering to update any changes
           fabricCanvas.renderAll();
         });
         
