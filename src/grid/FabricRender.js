@@ -241,7 +241,8 @@ class FabricRender {
       const tmpText = new fabric.Text(String(label), {
         fontSize: state.fontSize,
         fontFamily: state.fontFamily,
-        fontWeight: 300
+        fontWeight: 300,
+        textBaseline: 'alphabetic'
       });
       const textWidth = tmpText.width;
       
@@ -271,7 +272,8 @@ class FabricRender {
         selectable: false,
         evented: false,
         originX: 'left',
-        originY: 'top'
+        originY: 'top',
+        textBaseline: 'alphabetic'
       });
       
       // Add to canvas and track

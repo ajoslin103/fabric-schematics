@@ -22,3 +22,25 @@ export const fabric = fabricObj;
 export function canvasIsFabricCanvas(canvasElement) {
   return !!canvasElement?.['absolutePan'];
 }
+
+// Ensure a valid baseline is used by all Fabric text instances
+try {
+  if (fabric && fabric.Text && fabric.Text.prototype) {
+    fabric.Text.prototype.textBaseline = 'alphabetic';
+
+    // Harden: ensure canvas context baseline is valid inside Fabric's pipeline
+    const proto = fabric.Text.prototype;
+    const original = proto._setTextStyles;
+    if (typeof original === 'function') {
+      proto._setTextStyles = function(ctx) {
+        try { ctx.textBaseline = 'alphabetic'; } catch (_) {}
+        const ret = original.call(this, ctx);
+        // Some Fabric versions may mutate ctx again; enforce after call too
+        try { ctx.textBaseline = 'alphabetic'; } catch (_) {}
+        return ret;
+      };
+    }
+  }
+} catch (_) {
+  // ignore if fabric is not available yet
+}
